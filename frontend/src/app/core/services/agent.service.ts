@@ -142,4 +142,10 @@ export class AgentService {
       'futures_strategy'
     ];
   }
+
+  getLeaderboard(): Observable<AgentConfig[]> {
+    return this.http
+      .get<BackendAgent[]>(`${this.apiUrl}/agents/leaderboard/global`)
+      .pipe(map((items) => items.map((item) => this.mapAgent(item))));
+  }
 }

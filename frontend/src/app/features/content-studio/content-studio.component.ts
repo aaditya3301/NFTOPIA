@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ContentNft } from '../../core/models/content.model';
 import { ContentService } from '../../core/services/content.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { Web3Service } from '../../core/services/web3.service';
 import { ContentHistoryComponent } from './components/content-history.component';
 import { ContentTypeSelectorComponent } from './components/content-type-selector.component';
 import { GenerationPreviewComponent } from './components/generation-preview.component';
@@ -62,6 +63,7 @@ export class ContentStudioComponent {
   private readonly router = inject(Router);
   private readonly content = inject(ContentService);
   private readonly notify = inject(NotificationService);
+  private readonly web3 = inject(Web3Service);
 
   readonly agentId = Number(this.route.snapshot.paramMap.get('agentId') || 0);
   readonly contentType = signal<'image' | 'video' | 'text'>('image');
@@ -147,14 +149,42 @@ export class ContentStudioComponent {
       });
   }
 
-  mintLatestContent(isAuto = false): void {
+  async mintLatestContent(isAuto = false): Promise<void> {
     const contentId = this.lastContentId();
     if (!contentId) {
       this.notify.warning('Generate content first, then mint.');
       return;
     }
 
+    // Ensure wallet connected
+    let wallet = this.web3.walletAddress();
+    if (!wallet) {
+      try {
+        await this.web3.connectWallet();
+        wallet = this.web3.walletAddress();
+      } catch {
+        this.notify.error('Connect your wallet to mint content');
+        return;
+      }
+    }
+
+    // Trigger MetaMask popup for mint fee
     this.isMinting.set(true);
+    try {
+      this.notify.info('Confirm the mint fee in your wallet...');
+      await this.web3.sendMintFee('0.005');
+    } catch (err) {
+      this.isMinting.set(false);
+      const msg = err instanceof Error ? err.message : 'Transaction rejected';
+      if (msg.includes('rejected') || msg.includes('denied')) {
+        this.notify.warning('Mint cancelled by user');
+      } else {
+        this.notify.error(`Wallet error: ${msg}`);
+      }
+      return;
+    }
+
+    // Proceed with backend mint
     this.content.mintContent(contentId, this.priceForge).subscribe({
       next: () => {
         this.isMinting.set(false);

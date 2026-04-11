@@ -83,11 +83,11 @@ import { TrainingVisualizerComponent } from './components/training-visualizer.co
           <app-training-visualizer [epoch]="trainingEpoch()" [totalEpochs]="100" [rewards]="rewardCurve()" [sharpe]="trainingSharpe()" [maxDrawdown]="trainingDrawdown()"></app-training-visualizer>
           
           <div *ngIf="trainingComplete()" class="glass-card p-5 space-y-3">
-            <h3 class="font-display text-xl text-white">🎉 Training Complete!</h3>
+            <h3 class="font-display text-xl text-white">Training Complete</h3>
             <p class="text-sm text-slate-300">Your RL model achieved a Sharpe ratio of <span class="text-forge-secondary font-bold">{{ trainingSharpe().toFixed(2) }}</span> with max drawdown of <span class="text-forge-warning font-bold">{{ trainingDrawdown().toFixed(1) }}%</span>.</p>
             <p class="text-sm text-slate-300">Mint this as an NFT agent to deploy it on-chain and start earning.</p>
             <button class="btn-forge w-full text-center" (click)="mintTradingAgent()" [disabled]="isMinting()">
-              {{ isMinting() ? 'Minting on chain...' : '⚡ MINT TRADING AGENT NFT' }}
+              {{ isMinting() ? 'Minting on chain...' : 'MINT TRADING AGENT NFT' }}
             </button>
           </div>
         </div>
@@ -368,7 +368,7 @@ export class TradingComponent implements OnInit, OnDestroy {
     }).pipe(finalize(() => this.isMinting.set(false)))
     .subscribe({
       next: (res) => {
-        this.notify.success(`🎉 Trading Agent #${res.tokenId} minted successfully!`);
+        this.notify.success(`Trading Agent #${res.tokenId} minted successfully`);
         // Reset training state
         this.trainingComplete.set(false);
         this.trainingEpoch.set(0);
