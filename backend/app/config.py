@@ -7,6 +7,14 @@ class Settings(BaseSettings):
     API_PREFIX: str = "/api"
 
     DATABASE_URL: str = "postgresql+asyncpg://forge:forgepass@localhost:5432/agentforge"
+
+    def __init__(self, **values):
+        super().__init__(**values)
+        if self.DATABASE_URL.startswith("postgres://"):
+            self.DATABASE_URL = self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif self.DATABASE_URL.startswith("postgresql://") and "+asyncpg" not in self.DATABASE_URL:
+            self.DATABASE_URL = self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
     REDIS_URL: str = "redis://localhost:6379/0"
 
     HELA_RPC_URL: str = "https://testnet-rpc.helachain.com"
