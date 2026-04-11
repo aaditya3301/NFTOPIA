@@ -44,7 +44,41 @@ async def list_marketplace_strategies(limit: int = 20, offset: int = 0, db: Asyn
         .limit(limit)
         .offset(offset)
     )
-    return result.scalars().all()
+    items = result.scalars().all()
+
+    response = []
+    for strategy in items:
+        listing_result = await db.execute(
+            select(AgentMemory)
+            .where(
+                AgentMemory.token_id == strategy.token_id,
+                AgentMemory.event_type == "strategy_listed_for_rent",
+            )
+            .order_by(AgentMemory.timestamp.desc())
+            .limit(1)
+        )
+        listing = listing_result.scalars().first()
+        data = listing.event_data if listing else {}
+
+        response.append(
+            {
+                "token_id": strategy.token_id,
+                "strategy_type": strategy.strategy_type,
+                "assets": strategy.assets,
+                "total_pnl": strategy.total_pnl,
+                "total_trades": strategy.total_trades,
+                "win_rate": strategy.win_rate,
+                "max_drawdown": strategy.max_drawdown,
+                "sharpe_ratio": strategy.sharpe_ratio,
+                "is_marketplace_listed": strategy.is_marketplace_listed,
+                "created_at": strategy.created_at,
+                "owner_address": data.get("owner", ""),
+                "price_per_day": float(data.get("pricePerDay", 0.0)),
+                "max_duration": int(data.get("maxDuration", 0)),
+            }
+        )
+
+    return response
 
 
 @router.post("/strategies/list")

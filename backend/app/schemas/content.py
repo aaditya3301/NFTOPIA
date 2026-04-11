@@ -13,3 +13,17 @@ class GenerationResponse(BaseModel):
     content_type: str
     content_url: str
     prompt: str
+    metadata_uri: str | None = None
+    content_nft_token_id: int | None = None
+    tx_hash: str | None = None
+
+
+class MintContentRequest(BaseModel):
+    price_forge: float = 0.0
+
+
+class MintContentResponse(BaseModel):
+    content_id: str
+    content_nft_token_id: int
+    price_forge: float
+    tx_hash: str

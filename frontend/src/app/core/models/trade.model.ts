@@ -1,16 +1,13 @@
 export interface TradingAgent {
   tokenId: number;
+  specialization?: string;
   strategyType: string;
   assets: string[];
-  returns30d: number;
-  returns90d: number;
+  totalPnl: number;
   winRate: number;
   totalTrades: number;
-  usersAllocated: number;
-  totalAllocated: number;
-  maxDrawdown: number;
-  sharpeRatio: number;
-  operatingSince: string;
+  maxDrawdown: number | null;
+  sharpeRatio: number | null;
   rank: number;
   traits: string[];
   level: number;
@@ -31,13 +28,24 @@ export interface TradeLog {
 export interface AllocationRequest {
   agentTokenId: number;
   amountForge: number;
-  allocatorAddress: string;
 }
 
 export interface CustomBotConfig {
+  agentTokenId?: number;
+  strategyType?: string;
   market: 'spot' | 'options' | 'futures';
   assets: string[];
   goal: 'maximize_returns' | 'maximize_sharpe' | 'minimize_drawdown';
   riskTolerance: 'low' | 'medium' | 'high';
   trainingPeriod: string;
+}
+
+export interface PnlSeriesResponse {
+  labels: string[];
+  values: number[];
+}
+
+export interface TrainingStartResponse {
+  trainingId: string;
+  status: string;
 }

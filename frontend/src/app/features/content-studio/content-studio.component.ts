@@ -114,13 +114,38 @@ export class ContentStudioComponent {
           this.generatedUrl.set(res.contentUrl);
           this.generatedText.set(this.contentType() === 'text' ? 'Generated text content is available via URL metadata.' : '');
           this.credits.update((current) => Math.max(0, current - 1));
-          this.notify.success('Content generated and listed successfully');
+
+          if (this.mintAsNft && res.contentId) {
+            this.content.mintContent(res.contentId, this.priceForge).subscribe({
+              next: () => {
+                this.notify.success('Content generated and minted to marketplace successfully');
+                this.refreshHistory();
+              },
+              error: () => {
+                this.notify.warning('Content generated but minting failed');
+                this.refreshHistory();
+              }
+            });
+          } else {
+            this.notify.success('Content generated successfully');
+            this.refreshHistory();
+          }
         },
         error: () => {
           this.isGenerating.set(false);
           this.notify.error('Generation failed. Verify backend and Gemini setup.');
         }
       });
+  }
+
+  private refreshHistory(): void {
+    if (!this.agentId) {
+      return;
+    }
+    this.content.getAgentContent(this.agentId).subscribe({
+      next: (items) => this.history.set(items),
+      error: () => this.history.set([])
+    });
   }
 
   selectHistoryItem(item: ContentNft): void {

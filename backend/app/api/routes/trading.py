@@ -10,6 +10,7 @@ from app.models.strategy import TradingStrategy
 from app.models.trade import TradeLog
 from app.schemas.trading import AllocationRequest, CustomBotConfig
 from app.tasks.training_task import train_custom_bot
+from app.tasks.trading_cron import execute_all_strategies
 
 router = APIRouter()
 
@@ -81,9 +82,11 @@ async def allocate_capital(request: AllocationRequest, db: AsyncSession = Depend
     if not agent or agent.agent_type.value != "trading":
         raise HTTPException(status_code=400, detail="Invalid trading agent")
 
+    allocator_address = (request.allocator_address or agent.owner_address or "").lower()
+
     allocation = Allocation(
         agent_token_id=request.agent_token_id,
-        allocator_address=agent.owner_address,
+        allocator_address=allocator_address,
         amount_forge=request.amount_forge,
         active=True,
     )
@@ -92,7 +95,7 @@ async def allocate_capital(request: AllocationRequest, db: AsyncSession = Depend
         AgentMemory(
             token_id=request.agent_token_id,
             event_type="capital_allocated",
-            event_data={"amountForge": request.amount_forge, "allocator": agent.owner_address},
+            event_data={"amountForge": request.amount_forge, "allocator": allocator_address},
         )
     )
     await db.commit()
@@ -102,7 +105,18 @@ async def allocate_capital(request: AllocationRequest, db: AsyncSession = Depend
         "agentTokenId": request.agent_token_id,
         "amountForge": request.amount_forge,
         "allocationId": allocation.id,
+        "allocatorAddress": allocator_address,
     }
+
+
+@router.get("/allocations/{owner_address}")
+async def get_allocations(owner_address: str, db: AsyncSession = Depends(get_db_session)):
+    result = await db.execute(
+        select(Allocation)
+        .where(Allocation.allocator_address == owner_address.lower())
+        .order_by(Allocation.created_at.desc())
+    )
+    return result.scalars().all()
 
 
 @router.post("/custom/create")
@@ -117,3 +131,9 @@ async def get_training_status(training_id: str):
 
     result = celery_app.AsyncResult(training_id)
     return {"trainingId": training_id, "status": result.status, "result": result.result}
+
+
+@router.post("/execute-cycle")
+async def execute_cycle_now():
+    task = execute_all_strategies.delay()
+    return {"status": "queued", "taskId": task.id}

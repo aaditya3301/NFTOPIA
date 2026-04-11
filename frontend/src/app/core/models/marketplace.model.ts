@@ -1,17 +1,20 @@
 export interface AgentListing {
   tokenId: number;
-  ownerAddress: string;
-  priceForge?: number;
-  rentalRateForge?: number;
+  strategyType: string;
+  assets: string[];
+  totalPnl: number;
+  totalTrades: number;
+  winRate: number;
+  maxDrawdown: number | null;
+  sharpeRatio: number | null;
   listedAt: string;
-  isRentable: boolean;
-  isPurchasable: boolean;
+  isListed: boolean;
 }
 
 export interface RentalListingRequest {
   tokenId: number;
-  dailyRate: number;
-  maxDurationDays: number;
+  pricePerDay: number;
+  maxDuration: number;
 }
 
 export interface PlatformStats {

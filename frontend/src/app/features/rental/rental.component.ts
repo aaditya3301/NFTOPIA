@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import { MarketplaceService } from '../../core/services/marketplace.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ActiveRentalItem } from './components/active-rentals.component';
 import { ActiveRentalsComponent } from './components/active-rentals.component';
 import { RentalBrowseComponent, RentalBrowseItem } from './components/rental-browse.component';
 import { RentalListingFormComponent } from './components/rental-listing-form.component';
@@ -16,33 +18,80 @@ import { RentalListingFormComponent } from './components/rental-listing-form.com
       </header>
 
       <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <app-rental-browse [items]="browse" (rent)="rentAgent($event)"></app-rental-browse>
+        <app-rental-browse [items]="browse()" (rent)="rentAgent($event)"></app-rental-browse>
         <div class="space-y-5">
           <app-rental-listing-form (createListing)="createListing($event)"></app-rental-listing-form>
-          <app-active-rentals [items]="listings"></app-active-rentals>
+          <app-active-rentals [items]="listings()"></app-active-rentals>
         </div>
       </div>
     </section>
   `
 })
 export class RentalComponent {
-  constructor(private readonly notify: NotificationService) {}
+  constructor(
+    private readonly notify: NotificationService,
+    private readonly marketplace: MarketplaceService
+  ) {
+    this.refreshListings();
+  }
 
-  readonly browse: RentalBrowseItem[] = [
-    { tokenId: 450, specialization: 'trend_following', rate: 42, maxDays: 7 },
-    { tokenId: 451, specialization: 'anime_art', rate: 26, maxDays: 14 }
-  ];
+  readonly browse = signal<RentalBrowseItem[]>([]);
+  readonly listings = signal<ActiveRentalItem[]>([]);
 
-  readonly listings = [
-    { tokenId: 42, income: 920, renter: '0x9f...2ab4' },
-    { tokenId: 318, income: 1570, renter: '0xe3...91cd' }
-  ];
+  private refreshListings(): void {
+    this.marketplace.getAgents().subscribe({
+      next: (agents) => {
+        this.browse.set(
+          agents
+            .filter((item) => item.isListed)
+            .map((item) => ({
+              tokenId: item.tokenId,
+              specialization: item.strategyType,
+              rate: 0,
+              maxDays: 30
+            }))
+        );
+      },
+      error: () => this.browse.set([])
+    });
+
+    this.marketplace.getActiveRentals('').subscribe({
+      next: (items) => {
+        this.listings.set(
+          items.map((item) => ({
+            tokenId: item.tokenId,
+            income: item.totalPnl,
+            renter: 'Active'
+          }))
+        );
+      },
+      error: () => this.listings.set([])
+    });
+  }
 
   rentAgent(item: RentalBrowseItem): void {
-    this.notify.success(`Rental flow opened for Agent #${item.tokenId}`);
+    this.marketplace.rentStrategy(item.tokenId, 1).subscribe({
+      next: () => {
+        this.notify.success(`Rented Agent #${item.tokenId} for 1 day`);
+        this.refreshListings();
+      },
+      error: () => this.notify.error(`Rent request failed for Agent #${item.tokenId}`)
+    });
   }
 
   createListing(payload: { tokenId: number; pricePerDay: number; maxDuration: number }): void {
-    this.notify.success(`Listing created: Agent #${payload.tokenId} at ${payload.pricePerDay} $FORGE/day`);
+    this.marketplace
+      .listForRent({
+        tokenId: payload.tokenId,
+        pricePerDay: payload.pricePerDay,
+        maxDuration: payload.maxDuration
+      })
+      .subscribe({
+        next: () => {
+          this.notify.success(`Listing created: Agent #${payload.tokenId} at ${payload.pricePerDay} $FORGE/day`);
+          this.refreshListings();
+        },
+        error: () => this.notify.error('Failed to create rental listing')
+      });
   }
 }

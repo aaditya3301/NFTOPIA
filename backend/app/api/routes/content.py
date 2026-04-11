@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_db_session
 from app.models.agent import AgentConfig
 from app.models.content import ContentOutput
-from app.schemas.content import GenerationRequest, GenerationResponse
+from app.schemas.content import GenerationRequest, GenerationResponse, MintContentRequest, MintContentResponse
 from app.services.content_engine import ContentEngine
 
 router = APIRouter()
@@ -21,7 +21,10 @@ async def generate_content(request: GenerationRequest, db: AsyncSession = Depend
     if agent.agent_type.value != "content":
         raise HTTPException(status_code=400, detail="Not a content agent")
 
-    return await engine.generate(agent, request, db)
+    try:
+        return await engine.generate(agent, request, db)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/agent/{agent_id}")
@@ -52,3 +55,32 @@ async def get_marketplace_content(
     query = query.limit(limit).offset(offset)
     result = await db.execute(query)
     return result.scalars().all()
+
+
+@router.post("/mint/{content_id}", response_model=MintContentResponse)
+async def mint_content(
+    content_id: str,
+    request: MintContentRequest,
+    db: AsyncSession = Depends(get_db_session),
+):
+    result = await db.execute(select(ContentOutput).where(ContentOutput.content_id == content_id))
+    content = result.scalar_one_or_none()
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found")
+
+    if content.content_nft_token_id is None:
+        latest = await db.execute(select(ContentOutput.id).order_by(ContentOutput.id.desc()).limit(1))
+        latest_id = latest.scalar() or 0
+        content.content_nft_token_id = int(latest_id)
+
+    content.price_forge = float(request.price_forge)
+    content.tx_hash = content.tx_hash or f"simulated_tx_{content.content_id}"
+    db.add(content)
+    await db.commit()
+
+    return {
+        "content_id": content.content_id,
+        "content_nft_token_id": int(content.content_nft_token_id),
+        "price_forge": float(content.price_forge or 0.0),
+        "tx_hash": content.tx_hash or "",
+    }

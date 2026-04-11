@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -112,7 +112,24 @@ contract RentalMarket is ReentrancyGuard, AccessControl {
             return false;
         }
         if (block.timestamp >= rental.endTime) {
-            retu
+            return false;
         }
+        return rental.renter == user;
+    }
+
+    function cancelListing(uint256 tokenId) external {
+        require(listings[tokenId].owner == msg.sender, "Not owner");
+        require(!activeRentals[tokenId].active, "Currently rented");
+
+        listings[tokenId].active = false;
+        emit ListingCancelled(tokenId);
+    }
+
+    function getOwnerListings(address owner) external view returns (uint256[] memory) {
+        return ownerListings[owner];
+    }
+
+    function getRenterActive(address renter) external view returns (uint256[] memory) {
+        return renterActive[renter];
     }
 }

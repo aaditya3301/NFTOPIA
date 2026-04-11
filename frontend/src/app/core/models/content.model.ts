@@ -16,6 +16,7 @@ export interface GenerationResponse {
 }
 
 export interface ContentNft {
+  contentId?: string;
   tokenId: number;
   contentUrl: string;
   contentType: string;

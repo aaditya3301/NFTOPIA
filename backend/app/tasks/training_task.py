@@ -1,35 +1,20 @@
-import asyncio
-import json
 import uuid
-from pathlib import Path
 
 from sqlalchemy import select
 
+from app.ml.training.rl_trainer import trainer
 from app.models.agent import AgentConfig
 from app.models.base import async_session
 from app.models.memory import AgentMemory
 from app.models.strategy import TradingStrategy
+from app.tasks.async_runner import run_async
 from app.tasks.celery_app import celery_app
-
-
-def _run_async(coro):
-    try:
-        return asyncio.run(coro)
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        try:
-            return loop.run_until_complete(coro)
-        finally:
-            loop.close()
-
-
-def _artifact_root() -> Path:
-    return Path(__file__).resolve().parents[1] / "ml" / "models"
 
 
 async def _train_custom_bot(config: dict) -> dict:
     owner = (config.get("owner_address") or "").lower()
     token_id = config.get("agent_token_id")
+    training_id = str(config.get("training_id") or uuid.uuid4().hex[:10])
 
     async with async_session() as db:
         if token_id is None:
@@ -68,24 +53,22 @@ async def _train_custom_bot(config: dict) -> dict:
             strategy.risk_params = config.get("risk_params", strategy.risk_params)
             strategy.decision_model = "ml_model"
 
-        artifact_dir = _artifact_root()
-        artifact_dir.mkdir(parents=True, exist_ok=True)
-
-        run_id = uuid.uuid4().hex[:10]
-        model_path = artifact_dir / f"bot_{token_id}_{run_id}.json"
-
-        artifact_payload = {
-            "runId": run_id,
-            "tokenId": token_id,
-            "strategyType": strategy.strategy_type,
+        training_config = {
             "assets": strategy.assets,
-            "timeframe": strategy.timeframe,
-            "riskParams": strategy.risk_params,
-            "trainer": "phase3_baseline",
+            "goal": config.get("goal", "maximize_returns"),
+            "risk_tolerance": config.get("risk_tolerance", "medium"),
+            "training_period": config.get("training_period", "6m"),
+            "timesteps": config.get("timesteps"),
+            "initial_balance": config.get("initial_balance", 10000),
         }
-        model_path.write_text(json.dumps(artifact_payload, indent=2), encoding="utf-8")
 
-        strategy.model_path = str(model_path)
+        price_data = await trainer.fetch_training_data(
+            strategy.assets,
+            period=str(training_config.get("training_period") or "6m"),
+        )
+
+        model_path, metrics = trainer.train(training_id=training_id, config=training_config, price_data=price_data)
+        strategy.model_path = model_path
 
         db.add(
             AgentMemory(
@@ -95,6 +78,7 @@ async def _train_custom_bot(config: dict) -> dict:
                     "strategyType": strategy.strategy_type,
                     "assets": strategy.assets,
                     "modelPath": strategy.model_path,
+                    "metrics": metrics,
                 },
             )
         )
@@ -104,14 +88,18 @@ async def _train_custom_bot(config: dict) -> dict:
         return {
             "status": "completed",
             "detail": "training finished",
+            "trainingId": training_id,
             "tokenId": token_id,
             "strategy": strategy.strategy_type,
             "assets": strategy.assets,
             "modelPath": strategy.model_path,
             "decisionModel": strategy.decision_model,
+            "metrics": metrics,
         }
 
 
-@celery_app.task
-def train_custom_bot(config: dict):
-    return _run_async(_train_custom_bot(config))
+@celery_app.task(bind=True)
+def train_custom_bot(self, config: dict):
+    payload = dict(config or {})
+    payload["training_id"] = self.request.id
+    return run_async(lambda: _train_custom_bot(payload))

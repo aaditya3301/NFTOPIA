@@ -1,9 +1,11 @@
 import { NgIf } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TradeLog, TradingAgent } from '../../core/models/trade.model';
+import { Subscription } from 'rxjs';
+import { CustomBotConfig, TradeLog, TradingAgent } from '../../core/models/trade.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { TradingService } from '../../core/services/trading.service';
+import { WebSocketService } from '../../core/services/websocket.service';
 import { AllocationManagerComponent } from './components/allocation-manager.component';
 import { BotLeaderboardComponent } from './components/bot-leaderboard.component';
 import { CustomBotBuilderComponent } from './components/custom-bot-builder.component';
@@ -65,7 +67,7 @@ import { TrainingVisualizerComponent } from './components/training-visualizer.co
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1fr]" *ngIf="selectedBot()">
           <app-allocation-manager [selectedBot]="selectedBot()" (allocate)="confirmAllocation($event)"></app-allocation-manager>
-          <app-pnl-chart [pnlValues]="pnlSeries()"></app-pnl-chart>
+          <app-pnl-chart [labels]="pnlLabels()" [pnlValues]="pnlSeries()"></app-pnl-chart>
         </div>
 
         <app-trade-log-table [trades]="tradeLog()"></app-trade-log-table>
@@ -78,19 +80,26 @@ import { TrainingVisualizerComponent } from './components/training-visualizer.co
     </section>
   `
 })
-export class TradingComponent {
+export class TradingComponent implements OnDestroy {
   private readonly trading = inject(TradingService);
   private readonly notify = inject(NotificationService);
+  private readonly ws = inject(WebSocketService);
+
+  private tradingFeedSub: Subscription | null = null;
+  private trainingFeedSub: Subscription | null = null;
+  private activeTrainingId: string | null = null;
+  private activeTradingToken: number | null = null;
 
   readonly tab = signal<'market' | 'build'>('market');
   readonly bots = signal<TradingAgent[]>([]);
   readonly selectedBot = signal<TradingAgent | null>(null);
   readonly tradeLog = signal<TradeLog[]>([]);
-  readonly pnlSeries = signal<number[]>([0, 40, 62, 55, 80, 102, 116]);
+  readonly pnlSeries = signal<number[]>([]);
+  readonly pnlLabels = signal<string[]>([]);
   readonly trainingEpoch = signal(0);
   readonly trainingSharpe = signal(0);
   readonly trainingDrawdown = signal(0);
-  readonly rewardCurve = signal<number[]>([0.1]);
+  readonly rewardCurve = signal<number[]>([]);
 
   strategyFilter = '';
   riskFilter = '';
@@ -98,34 +107,31 @@ export class TradingComponent {
   sortBy: 'returns' | 'consistency' | 'popularity' = 'returns';
 
   constructor() {
+    this.loadLeaderboard();
+  }
+
+  ngOnDestroy(): void {
+    this.tradingFeedSub?.unsubscribe();
+    this.trainingFeedSub?.unsubscribe();
+
+    if (this.activeTradingToken !== null) {
+      this.ws.disconnect(`trading/${this.activeTradingToken}`);
+    }
+    if (this.activeTrainingId) {
+      this.ws.disconnect(`training/${this.activeTrainingId}`);
+    }
+  }
+
+  private loadLeaderboard(): void {
     this.trading.getLeaderboard().subscribe({
       next: (bots) => this.bots.set(bots),
-      error: () => {
-        this.bots.set([
-          {
-            tokenId: 88,
-            strategyType: 'momentum_trader',
-            assets: ['BTC', 'ETH'],
-            returns30d: 18.4,
-            returns90d: 42.1,
-            winRate: 63,
-            totalTrades: 142,
-            usersAllocated: 31,
-            totalAllocated: 125400,
-            maxDrawdown: 12.1,
-            sharpeRatio: 1.82,
-            operatingSince: '2026-01-05',
-            rank: 1,
-            traits: ['antifragile'],
-            level: 10
-          }
-        ]);
-      }
+      error: () => this.notify.error('Failed to load trading leaderboard')
     });
   }
 
   filteredBots(): TradingAgent[] {
     const query = this.strategyFilter.toLowerCase().trim();
+
     return this.bots()
       .filter((bot) => (query ? bot.strategyType.toLowerCase().includes(query) : true))
       .filter((bot) => {
@@ -133,88 +139,196 @@ export class TradingComponent {
           return true;
         }
 
+        const drawdown = bot.maxDrawdown ?? 0;
         if (this.riskFilter === 'low') {
-          return bot.maxDrawdown <= 8;
+          return drawdown <= 8;
         }
-
         if (this.riskFilter === 'medium') {
-          return bot.maxDrawdown > 8 && bot.maxDrawdown <= 15;
+          return drawdown > 8 && drawdown <= 15;
         }
-
-        return bot.maxDrawdown > 15;
+        return drawdown > 15;
       })
       .filter((bot) => {
         if (!this.trackRecordFilter) {
           return true;
         }
 
-        const days = Number(this.trackRecordFilter);
-        const since = new Date(bot.operatingSince).getTime();
-        const age = (Date.now() - since) / (1000 * 60 * 60 * 24);
-        return age >= days;
+        const requiredTrades = this.trackRecordFilter === '7' ? 10 : this.trackRecordFilter === '30' ? 30 : 80;
+        return bot.totalTrades >= requiredTrades;
       });
   }
 
   sortLeaderboard(): void {
     const sorted = [...this.bots()];
+
     if (this.sortBy === 'returns') {
-      sorted.sort((a, b) => b.returns30d - a.returns30d);
+      sorted.sort((a, b) => b.totalPnl - a.totalPnl);
     } else if (this.sortBy === 'consistency') {
-      sorted.sort((a, b) => b.sharpeRatio - a.sharpeRatio);
+      sorted.sort((a, b) => (b.sharpeRatio ?? 0) - (a.sharpeRatio ?? 0));
     } else {
-      sorted.sort((a, b) => b.usersAllocated - a.usersAllocated);
+      sorted.sort((a, b) => b.totalTrades - a.totalTrades);
     }
+
     this.bots.set(sorted);
   }
 
   openAllocation(bot: TradingAgent): void {
     this.selectedBot.set(bot);
-    this.tradeLog.set([
-      {
-        tradeId: 't_991',
-        action: 'BUY',
-        asset: bot.assets[0] ?? 'BTC',
-        entryPrice: 67500,
-        exitPrice: null,
-        quantityForge: 1200,
-        pnlForge: 0,
-        reasoning: 'Momentum signal + volume breakout',
-        timestamp: '2026-04-10T11:30:00Z'
+
+    this.trading.getTradeLog(bot.tokenId).subscribe({
+      next: (items) => this.tradeLog.set(items),
+      error: () => this.tradeLog.set([])
+    });
+
+    this.trading.getPnLData(bot.tokenId, '30d').subscribe({
+      next: (series) => {
+        this.pnlLabels.set(series.labels);
+        this.pnlSeries.set(series.values);
       },
-      {
-        tradeId: 't_990',
-        action: 'SELL',
-        asset: bot.assets[1] ?? 'ETH',
-        entryPrice: 3380,
-        exitPrice: 3528,
-        quantityForge: 900,
-        pnlForge: 84,
-        reasoning: 'Target reached and volatility rising',
-        timestamp: '2026-04-10T09:05:00Z'
+      error: () => {
+        this.pnlLabels.set([]);
+        this.pnlSeries.set([]);
       }
-    ]);
+    });
+
+    this.tradingFeedSub?.unsubscribe();
+    if (this.activeTradingToken !== null) {
+      this.ws.disconnect(`trading/${this.activeTradingToken}`);
+    }
+
+    this.activeTradingToken = bot.tokenId;
+    this.tradingFeedSub = this.ws.subscribeTradingFeed(bot.tokenId).subscribe({
+      next: (packet) => {
+        if (typeof packet !== 'object' || packet === null) {
+          return;
+        }
+
+        const payload = packet as {
+          trades?: Array<{
+            tradeId: string;
+            action: 'BUY' | 'SELL' | 'HOLD';
+            asset: string;
+            entryPrice: number;
+            exitPrice: number | null;
+            quantityForge: number;
+            pnlForge: number | null;
+            timestamp: string;
+            cumulativePnl?: number;
+          }>;
+        };
+
+        if (!Array.isArray(payload.trades)) {
+          return;
+        }
+
+        this.tradeLog.set(
+          payload.trades.map((item) => ({
+            tradeId: item.tradeId,
+            action: item.action,
+            asset: item.asset,
+            entryPrice: item.entryPrice,
+            exitPrice: item.exitPrice,
+            quantityForge: item.quantityForge,
+            pnlForge: item.pnlForge,
+            reasoning: '',
+            timestamp: item.timestamp
+          }))
+        );
+
+        this.pnlLabels.set(payload.trades.map((item) => new Date(item.timestamp).toLocaleTimeString()));
+        this.pnlSeries.set(payload.trades.map((item) => item.cumulativePnl ?? 0));
+      }
+    });
   }
 
   confirmAllocation(payload: { bot: TradingAgent; amount: number }): void {
-    this.notify.success(`Successfully allocated ${payload.amount} $FORGE to Agent #${payload.bot.tokenId}`);
+    this.trading
+      .allocate({
+        agentTokenId: payload.bot.tokenId,
+        amountForge: payload.amount
+      })
+      .subscribe({
+        next: () => {
+          this.notify.success(`Successfully allocated ${payload.amount} $FORGE to Agent #${payload.bot.tokenId}`);
+          this.openAllocation(payload.bot);
+        },
+        error: () => this.notify.error('Allocation request failed')
+      });
   }
 
-  startTraining(_config: unknown): void {
-    this.notify.info('Training started');
-    let epoch = 0;
-    const rewards: number[] = [0.08];
-    const timer = setInterval(() => {
-      epoch += 5;
-      this.trainingEpoch.set(epoch);
-      const reward = Number((rewards[rewards.length - 1] + Math.random() * 0.08).toFixed(3));
-      rewards.push(reward);
-      this.rewardCurve.set([...rewards]);
-      this.trainingSharpe.set(0.8 + epoch / 100);
-      this.trainingDrawdown.set(Math.max(2.5, 12 - epoch / 12));
-      if (epoch >= 100) {
-        clearInterval(timer);
-        this.notify.success('Training complete. You can now mint the custom bot.');
-      }
-    }, 350);
+  startTraining(config: CustomBotConfig): void {
+    this.trainingEpoch.set(0);
+    this.trainingSharpe.set(0);
+    this.trainingDrawdown.set(0);
+    this.rewardCurve.set([]);
+
+    this.trading.createCustomBot(config).subscribe({
+      next: (res) => {
+        this.notify.info('Training started');
+
+        if (this.activeTrainingId) {
+          this.ws.disconnect(`training/${this.activeTrainingId}`);
+        }
+        this.trainingFeedSub?.unsubscribe();
+        this.activeTrainingId = res.trainingId;
+
+        this.trainingFeedSub = this.ws.subscribeTrainingFeed(res.trainingId).subscribe({
+          next: (packet) => {
+            if (typeof packet !== 'object' || packet === null) {
+              return;
+            }
+
+            const data = packet as {
+              status?: string;
+              ready?: boolean;
+              progress?: Record<string, unknown>;
+              result?: { metrics?: { sharpe_ratio?: number; max_drawdown_pct?: number } };
+              error?: string;
+            };
+
+            const progress = data.progress ?? {};
+            const pct = Number(progress['progressPct'] ?? progress['progress_pct'] ?? 0);
+            if (Number.isFinite(pct)) {
+              this.trainingEpoch.set(Math.max(0, Math.min(100, Math.round(pct))));
+            }
+
+            const reward = Number(progress['current_reward'] ?? progress['reward'] ?? Number.NaN);
+            if (Number.isFinite(reward)) {
+              this.rewardCurve.update((current) => [...current, reward]);
+            }
+
+            const sharpe = Number(progress['sharpe_ratio'] ?? progress['sharpe'] ?? Number.NaN);
+            if (Number.isFinite(sharpe)) {
+              this.trainingSharpe.set(sharpe);
+            }
+
+            const drawdown = Number(progress['max_drawdown_pct'] ?? progress['max_drawdown'] ?? Number.NaN);
+            if (Number.isFinite(drawdown)) {
+              this.trainingDrawdown.set(drawdown);
+            }
+
+            if (data.result?.metrics) {
+              const metrics = data.result.metrics;
+              if (typeof metrics.sharpe_ratio === 'number') {
+                this.trainingSharpe.set(metrics.sharpe_ratio);
+              }
+              if (typeof metrics.max_drawdown_pct === 'number') {
+                this.trainingDrawdown.set(metrics.max_drawdown_pct);
+              }
+            }
+
+            if (data.error) {
+              this.notify.error(data.error);
+            }
+
+            if (data.ready || data.status === 'SUCCESS' || data.status === 'FAILURE') {
+              this.trainingEpoch.set(100);
+              this.notify.success('Training complete. You can now mint the custom bot.');
+            }
+          }
+        });
+      },
+      error: () => this.notify.error('Could not start training job')
+    });
   }
 }

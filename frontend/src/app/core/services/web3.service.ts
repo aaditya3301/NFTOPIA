@@ -14,6 +14,36 @@ interface ChainConfig {
   };
 }
 
+interface MintAgentInput {
+  ownerAddress?: string;
+  to?: string;
+  agentType: number;
+  specialization: string;
+  skillScores: [number, number, number, number, number];
+  metadataURI: string;
+}
+
+const AGENT_NFT_ABI: ethers.InterfaceAbi = [
+  'function mintAgent(address to, uint8 _agentType, string _specialization, uint256[5] _initialSkills, string _metadataURI) returns (uint256)',
+  'function getAgentDNA(uint256 tokenId) view returns ((uint8 agentType, string specialization, uint256[5] skillScores, uint256 level, uint256 totalEarnings, uint256 jobsCompleted, uint256 reputationScore, string[] traits, uint256 mintedAt, address tbaWallet))',
+  'function getAgentsByOwner(address owner) view returns (uint256[])',
+  'function ownerOf(uint256 tokenId) view returns (address)'
+];
+
+const FORGE_TOKEN_ABI: ethers.InterfaceAbi = [
+  'function balanceOf(address account) view returns (uint256)',
+  'function approve(address spender, uint256 amount) returns (bool)'
+];
+
+const JOB_ESCROW_ABI: ethers.InterfaceAbi = [
+  'function createJob(uint256 agentTokenId, address agentOwner, address agentTBAWallet, uint256 amount) returns (uint256)'
+];
+
+const RENTAL_MARKET_ABI: ethers.InterfaceAbi = [
+  'function listForRent(uint256 tokenId, uint256 pricePerDay, uint256 maxDuration)',
+  'function rent(uint256 tokenId, uint256 days_)'
+];
+
 @Injectable({ providedIn: 'root' })
 export class Web3Service {
   private readonly _walletAddress = signal<string | null>(null);
@@ -132,36 +162,135 @@ export class Web3Service {
     return new ethers.Contract(address, abi, signer);
   }
 
-  async mintAgent(_dnaMetadata: unknown): Promise<ethers.TransactionReceipt> {
-    throw new Error('Implement after Phase 2 contract deployment');
+  private async waitForReceipt(tx: ethers.ContractTransactionResponse): Promise<ethers.TransactionReceipt> {
+    const receipt = await tx.wait();
+    if (!receipt) {
+      throw new Error('Transaction dropped before confirmation');
+    }
+    return receipt;
   }
 
-  async getAgentDNA(_tokenId: number): Promise<unknown> {
-    throw new Error('Implement after Phase 2 contract deployment');
+  private coerceMintInput(input: unknown): MintAgentInput {
+    if (typeof input !== 'object' || input === null) {
+      throw new Error('Invalid mint payload');
+    }
+
+    const payload = input as Partial<MintAgentInput>;
+    if (typeof payload.agentType !== 'number') {
+      throw new Error('mintAgent payload missing numeric agentType');
+    }
+    if (typeof payload.specialization !== 'string' || !payload.specialization.trim()) {
+      throw new Error('mintAgent payload missing specialization');
+    }
+    if (!Array.isArray(payload.skillScores) || payload.skillScores.length !== 5) {
+      throw new Error('mintAgent payload requires skillScores[5]');
+    }
+    if (typeof payload.metadataURI !== 'string' || !payload.metadataURI.trim()) {
+      throw new Error('mintAgent payload missing metadataURI');
+    }
+
+    const skillScores = payload.skillScores.map((value) => {
+      if (typeof value !== 'number') {
+        throw new Error('skillScores must contain numbers only');
+      }
+      return value;
+    }) as [number, number, number, number, number];
+
+    return {
+      ownerAddress: payload.ownerAddress,
+      to: payload.to,
+      agentType: payload.agentType,
+      specialization: payload.specialization,
+      skillScores,
+      metadataURI: payload.metadataURI
+    };
   }
 
-  async getAgentsByOwner(_owner: string): Promise<unknown[]> {
-    throw new Error('Implement after Phase 2 contract deployment');
+  async mintAgent(dnaMetadata: unknown): Promise<ethers.TransactionReceipt> {
+    const signer = this._signer();
+    if (!signer) {
+      throw new Error('Wallet not connected');
+    }
+
+    const payload = this.coerceMintInput(dnaMetadata);
+    const to = payload.ownerAddress ?? payload.to ?? (await signer.getAddress());
+
+    const contract = this.getContract(this.contractAddresses.agentNFT, AGENT_NFT_ABI);
+    const tx = await contract['mintAgent'](
+      to,
+      payload.agentType,
+      payload.specialization,
+      payload.skillScores,
+      payload.metadataURI
+    );
+
+    return this.waitForReceipt(tx as ethers.ContractTransactionResponse);
   }
 
-  async getForgeBalance(_address: string): Promise<string> {
-    throw new Error('Implement after Phase 2 contract deployment');
+  async getAgentDNA(tokenId: number): Promise<unknown> {
+    const contract = this.getContract(this.contractAddresses.agentNFT, AGENT_NFT_ABI);
+    const dna = await contract['getAgentDNA'](tokenId);
+
+    return {
+      agentType: Number(dna.agentType),
+      specialization: String(dna.specialization),
+      skillScores: (dna.skillScores as bigint[]).map((value) => Number(value)),
+      level: Number(dna.level),
+      totalEarnings: String(dna.totalEarnings),
+      jobsCompleted: Number(dna.jobsCompleted),
+      reputationScore: Number(dna.reputationScore),
+      traits: [...(dna.traits as string[])],
+      mintedAt: Number(dna.mintedAt),
+      tbaWallet: String(dna.tbaWallet)
+    };
   }
 
-  async approveForge(_spender: string, _amount: string): Promise<void> {
-    throw new Error('Implement after Phase 2 contract deployment');
+  async getAgentsByOwner(owner: string): Promise<unknown[]> {
+    const contract = this.getContract(this.contractAddresses.agentNFT, AGENT_NFT_ABI);
+    const tokenIds = (await contract['getAgentsByOwner'](owner)) as bigint[];
+    return tokenIds.map((value) => Number(value));
   }
 
-  async createJob(_agentTokenId: number, _amount: string): Promise<void> {
-    throw new Error('Implement after Phase 2 contract deployment');
+  async getForgeBalance(address: string): Promise<string> {
+    const contract = this.getContract(this.contractAddresses.forgeToken, FORGE_TOKEN_ABI);
+    const rawBalance = (await contract['balanceOf'](address)) as bigint;
+    return ethers.formatUnits(rawBalance, 18);
   }
 
-  async listForRent(_tokenId: number, _pricePerDay: string, _duration: number): Promise<void> {
-    throw new Error('Implement after Phase 2 contract deployment');
+  async approveForge(spender: string, amount: string): Promise<void> {
+    const contract = this.getContract(this.contractAddresses.forgeToken, FORGE_TOKEN_ABI);
+    const parsedAmount = ethers.parseUnits(amount, 18);
+    const tx = await contract['approve'](spender, parsedAmount);
+    await this.waitForReceipt(tx as ethers.ContractTransactionResponse);
   }
 
-  async rentAgent(_tokenId: number, _days: number): Promise<void> {
-    throw new Error('Implement after Phase 2 contract deployment');
+  async createJob(agentTokenId: number, amount: string): Promise<void> {
+    const escrow = this.getContract(this.contractAddresses.jobEscrow, JOB_ESCROW_ABI);
+    const agentNft = this.getContract(this.contractAddresses.agentNFT, AGENT_NFT_ABI);
+
+    const owner = (await agentNft['ownerOf'](agentTokenId)) as string;
+    const dna = await agentNft['getAgentDNA'](agentTokenId);
+    const tbaWallet = String(dna.tbaWallet);
+    if (!tbaWallet || tbaWallet === ethers.ZeroAddress) {
+      throw new Error('Agent does not have a Token Bound Account yet');
+    }
+
+    const parsedAmount = ethers.parseUnits(amount, 18);
+    const tx = await escrow['createJob'](agentTokenId, owner, tbaWallet, parsedAmount);
+    await this.waitForReceipt(tx as ethers.ContractTransactionResponse);
+  }
+
+  async listForRent(tokenId: number, pricePerDay: string, duration: number): Promise<void> {
+    const market = this.getContract(this.contractAddresses.rentalMarket, RENTAL_MARKET_ABI);
+    const parsedPrice = ethers.parseUnits(pricePerDay, 18);
+    const tx = await market['listForRent'](tokenId, parsedPrice, duration);
+    await this.waitForReceipt(tx as ethers.ContractTransactionResponse);
+  }
+
+  async rentAgent(tokenId: number, days: number): Promise<void> {
+    const market = this.getContract(this.contractAddresses.rentalMarket, RENTAL_MARKET_ABI);
+    const tx = await market['rent'](tokenId, days);
+    await this.waitForReceipt(tx as ethers.ContractTransactionResponse);
   }
 
   getAddressSnapshot(): string | null {

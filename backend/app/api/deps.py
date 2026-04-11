@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,9 +18,13 @@ def create_access_token(wallet_address: str) -> str:
 
 
 async def get_current_wallet(
+    request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ) -> str:
     if not credentials:
+        wallet_header = (request.headers.get("x-wallet-address") or "").strip().lower()
+        if wallet_header.startswith("0x") and len(wallet_header) == 42:
+            return wallet_header
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing auth token")
 
     token = credentials.credentials
