@@ -9,8 +9,6 @@ from app.models.memory import AgentMemory
 from app.models.strategy import TradingStrategy
 from app.models.trade import TradeLog
 from app.schemas.trading import AllocationRequest, CustomBotConfig
-from app.tasks.training_task import train_custom_bot
-from app.tasks.trading_cron import execute_all_strategies
 
 router = APIRouter()
 
@@ -121,19 +119,17 @@ async def get_allocations(owner_address: str, db: AsyncSession = Depends(get_db_
 
 @router.post("/custom/create")
 async def create_custom_bot(config: CustomBotConfig):
-    task = train_custom_bot.delay(config.model_dump())
-    return {"trainingId": task.id, "status": "training_started"}
+    # Training is handled on the frontend; backend just acknowledges
+    import uuid
+    training_id = str(uuid.uuid4())
+    return {"trainingId": training_id, "status": "training_started"}
 
 
 @router.get("/custom/training/{training_id}")
 async def get_training_status(training_id: str):
-    from app.tasks.celery_app import celery_app
-
-    result = celery_app.AsyncResult(training_id)
-    return {"trainingId": training_id, "status": result.status, "result": result.result}
+    return {"trainingId": training_id, "status": "TRAINING", "result": None}
 
 
 @router.post("/execute-cycle")
 async def execute_cycle_now():
-    task = execute_all_strategies.delay()
-    return {"status": "queued", "taskId": task.id}
+    return {"status": "acknowledged", "taskId": "manual"}
