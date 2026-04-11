@@ -1,15 +1,15 @@
-# AgentForge
+# NFTOPIA
 
 **AI Agent NFT Utility Platform on Hela Chain**
 
-AgentForge is a decentralized platform where users mint autonomous AI agents as NFTs, deploy them for content generation or algorithmic trading, and trade their outputs through a marketplace with a bidding system. Built on Hela Chain testnet using ERC-6551 token-bound accounts.
+NFTOPIA is a decentralized platform where users mint autonomous AI agents as NFTs, deploy them for content generation or algorithmic trading, and trade their outputs through a marketplace with a bidding system. Built on Hela Chain testnet using ERC-6551 token-bound accounts.
 
 ---
 
 ## Architecture
 
 ```
-agentforge/
+NFTOPIA/
 ├── contracts/       # Solidity smart contracts (Hardhat)
 ├── backend/         # FastAPI + PostgreSQL backend
 └── frontend/        # Angular 19 SPA
