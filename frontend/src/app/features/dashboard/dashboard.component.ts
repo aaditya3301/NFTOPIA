@@ -5,9 +5,7 @@ import { AgentConfig } from '../../core/models/agent.model';
 import { AgentService } from '../../core/services/agent.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Web3Service } from '../../core/services/web3.service';
-import { ActivityFeedComponent } from './components/activity-feed.component';
 import { AgentRosterComponent } from './components/agent-roster.component';
-import { EarningsSummaryComponent } from './components/earnings-summary.component';
 import { PortfolioOverviewComponent } from './components/portfolio-overview.component';
 import { TradingAgentMonitorComponent } from './components/trading-agent-monitor.component';
 
@@ -17,7 +15,6 @@ import { TradingAgentMonitorComponent } from './components/trading-agent-monitor
   imports: [
     NgIf, NgFor, FormsModule,
     PortfolioOverviewComponent, AgentRosterComponent,
-    EarningsSummaryComponent, ActivityFeedComponent,
     TradingAgentMonitorComponent
   ],
   template: `
@@ -27,16 +24,16 @@ import { TradingAgentMonitorComponent } from './components/trading-agent-monitor
         <h1>My Empire</h1>
       </header>
 
-      <app-portfolio-overview [agentsOwned]="agents.length.toString()" forgeBalance="0 $FORGE" allTimeEarnings="0 $FORGE" passiveRate="0 $FORGE"></app-portfolio-overview>
-      <app-agent-roster *ngIf="agents.length > 0" [agents]="agents"></app-agent-roster>
-      <div *ngIf="agents.length === 0" class="glass-card--glow flex flex-col items-center justify-center py-12 text-center">
+      <app-portfolio-overview [agentsOwned]="agents().length.toString()" forgeBalance="0 $FORGE" allTimeEarnings="0 $FORGE" passiveRate="0 $FORGE"></app-portfolio-overview>
+      <app-agent-roster *ngIf="agents().length > 0" [agents]="agents()"></app-agent-roster>
+      <div *ngIf="agents().length === 0" class="glass-card--glow flex flex-col items-center justify-center py-12 text-center">
          <p class="text-slate-500 text-lg mb-2">You don't own any agents yet.</p>
          <a href="/forge" class="btn-forge">Go to Forge</a>
       </div>
 
       <app-trading-agent-monitor
-        *ngIf="tradingAgents.length > 0"
-        [tradingAgents]="tradingAgents"
+        *ngIf="tradingAgents().length > 0"
+        [tradingAgents]="tradingAgents()"
         (allocate)="openAllocateModal($event)"
       ></app-trading-agent-monitor>
 
@@ -64,10 +61,7 @@ import { TradingAgentMonitorComponent } from './components/trading-agent-monitor
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-7 lg:grid-cols-[1.2fr_1fr]">
-        <app-earnings-summary></app-earnings-summary>
-        <app-activity-feed [items]="activityItems"></app-activity-feed>
-      </div>
+
     </section>
   `
 })
@@ -76,29 +70,26 @@ export class DashboardComponent {
   private web3Service = inject(Web3Service);
   private notify = inject(NotificationService);
 
-  readonly activityItems: string[] = [
-    'System initialized',
-    'Waiting for real-time events...'
-  ];
+
   readonly allocatingAgent = signal<AgentConfig | null>(null);
 
-  agents: AgentConfig[] = [];
-  tradingAgents: AgentConfig[] = [];
+  readonly agents = signal<AgentConfig[]>([]);
+  readonly tradingAgents = signal<AgentConfig[]>([]);
   allocateAmount = 100;
 
   constructor() {
     effect(() => {
       const address = this.web3Service.walletAddress();
       if (address) {
-        this.agentService.getMyAgents(address).subscribe(agents => {
-          this.agents = agents;
-          this.tradingAgents = agents.filter(a => a.agentType === 'trading');
+        this.agentService.getMyAgents(address).subscribe(data => {
+          this.agents.set(data);
+          this.tradingAgents.set(data.filter(a => a.agentType === 'trading'));
         });
       } else {
-        this.agents = [];
-        this.tradingAgents = [];
+        this.agents.set([]);
+        this.tradingAgents.set([]);
       }
-    });
+    }, { allowSignalWrites: true });
   }
 
   openAllocateModal(agent: AgentConfig): void {

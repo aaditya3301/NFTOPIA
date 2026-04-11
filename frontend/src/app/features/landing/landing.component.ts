@@ -66,58 +66,35 @@ import { AgentConfig } from '../../core/models/agent.model';
           </div>
         </div>
 
-        <!-- RIGHT: Character + Floating Cards -->
+        <!-- RIGHT: Character -->
         <div class="relative flex items-center justify-center animate-fade-up" style="animation-delay: 0.15s">
-          <!-- Floating NFT Card (top-right) -->
-          <div class="absolute -right-2 top-4 z-20 animate-float hidden sm:block">
-            <div class="glass-card--glow rounded-2xl bg-white p-4 shadow-float" style="min-width: 170px;">
-              <div class="flex items-center gap-3 mb-3">
-                <img src="assets/nft-avatar.png" alt="NFT creator" class="h-12 w-12 rounded-full object-cover ring-2 ring-nft-primary/20" />
-              </div>
-              <p class="text-xl font-black text-nft-darker">◆ 9.05 ETH</p>
-              <p class="mt-1 text-xs text-slate-400">Create by</p>
-              <p class="text-sm font-bold text-nft-darker tracking-wide">89HHFFL</p>
-            </div>
-          </div>
-
           <!-- Hero Character Image -->
-          <div class="relative">
-            <img
-              src="assets/hero-character.png"
-              alt="3D NFT Character"
-              class="relative z-10 mx-auto w-[320px] sm:w-[400px] lg:w-[460px] drop-shadow-[0_30px_60px_rgba(99,102,241,0.15)]"
-            />
-            <!-- Subtle glow behind character -->
-            <div class="absolute inset-0 -z-10 blur-[80px] opacity-30 bg-gradient-to-br from-nft-primary/40 via-transparent to-nft-secondary/30 rounded-full scale-75"></div>
-          </div>
-
-          <!-- Bottom creator tag -->
-          <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 z-20 animate-float-slow hidden sm:flex items-center gap-3 rounded-full bg-nft-dark/90 backdrop-blur-xl px-5 py-2.5 shadow-float">
-            <img src="assets/nft-avatar.png" alt="Creator" class="h-8 w-8 rounded-full object-cover ring-1 ring-white/20" />
-            <div>
-              <p class="text-xs font-bold text-white tracking-wide">ZCX551KL7</p>
-              <p class="text-[11px] text-slate-400">◆ 9.05 ETH</p>
-            </div>
-            <button class="rounded-full border border-white/20 px-3.5 py-1 text-[11px] font-semibold text-white hover:bg-white/10 transition-all">Follow</button>
-          </div>
+          <img
+            src="assets/hero-character.png"
+            alt="3D NFT Character"
+            class="relative z-10 mx-auto w-[320px] sm:w-[400px] lg:w-[460px] drop-shadow-[0_20px_50px_rgba(30,41,59,0.15)] transition-transform duration-700 hover:scale-105 hover:-translate-y-2 cursor-pointer"
+          />
         </div>
       </div>
 
       <!-- ═══ DARK STATS BAR ═══ -->
-      <div class="mt-4 -mx-4 sm:-mx-6 lg:-mx-10 rounded-t-[2.5rem] overflow-hidden">
-        <div class="bg-gradient-to-br from-nft-dark to-[#0B1120] px-6 py-12 sm:px-10">
-          <div class="mx-auto max-w-7xl grid grid-cols-1 gap-8 sm:grid-cols-3">
-            <div class="text-center sm:text-left group">
-              <p class="text-4xl font-black text-white font-mono tracking-tight group-hover:text-nft-primary-light transition-colors">{{ stats().agentsMinted | number }}</p>
-              <p class="mt-2 text-sm text-slate-400">Agents Minted</p>
+      <div class="mt-12 rounded-[2.5rem] overflow-hidden mx-auto max-w-5xl shadow-2xl relative">
+        <div class="bg-gradient-to-br from-nft-dark to-[#0B1120] px-6 py-10 sm:px-12 relative">
+          <!-- Subtle glow in stats bar -->
+          <div class="absolute inset-0 bg-gradient-to-r from-nft-primary/10 via-transparent to-nft-secondary/10 opacity-50 blur-xl pointer-events-none"></div>
+          
+          <div class="relative z-10 grid grid-cols-1 gap-10 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/50">
+            <div class="text-center group px-4 py-2">
+              <p class="text-5xl font-black text-white font-mono tracking-tight group-hover:text-nft-primary-light transition-colors">{{ stats().agentsMinted | number }}</p>
+              <p class="mt-3 text-sm font-medium uppercase tracking-widest text-slate-400">Agents Minted</p>
             </div>
-            <div class="text-center sm:text-left group">
-              <p class="text-4xl font-black text-white font-mono tracking-tight group-hover:text-nft-secondary-light transition-colors">{{ stats().forgeEarned | number }}</p>
-              <p class="mt-2 text-sm text-slate-400">FORGE Earned</p>
+            <div class="text-center group px-4 py-2">
+              <p class="text-5xl font-black text-white font-mono tracking-tight group-hover:text-nft-secondary-light transition-colors">{{ stats().forgeEarned | number }}</p>
+              <p class="mt-3 text-sm font-medium uppercase tracking-widest text-slate-400">FORGE Earned</p>
             </div>
-            <div class="text-center sm:text-left group">
-              <p class="text-4xl font-black text-white font-mono tracking-tight group-hover:text-nft-primary-light transition-colors">{{ stats().contentTraded | number }}</p>
-              <p class="mt-2 text-sm text-slate-400">Content NFTs</p>
+            <div class="text-center group px-4 py-2">
+              <p class="text-5xl font-black text-white font-mono tracking-tight group-hover:text-nft-primary-light transition-colors">{{ stats().contentTraded | number }}</p>
+              <p class="mt-3 text-sm font-medium uppercase tracking-widest text-slate-400">Content NFTs</p>
             </div>
           </div>
         </div>

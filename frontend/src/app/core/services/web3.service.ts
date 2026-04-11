@@ -79,6 +79,43 @@ export class Web3Service {
     nativeCurrency: { name: 'HLUSD', symbol: 'HLUSD', decimals: 18 }
   };
 
+  constructor() {
+    this.checkInitialConnection();
+  }
+
+  private async checkInitialConnection(): Promise<void> {
+    const eth = (window as Window & { ethereum?: any }).ethereum;
+    if (!eth) return;
+
+    try {
+      const provider = new ethers.BrowserProvider(eth);
+      const accounts = await provider.send('eth_accounts', []) as string[];
+      if (accounts && accounts.length > 0) {
+        const signer = await provider.getSigner();
+        const network = await provider.getNetwork();
+
+        this._provider.set(provider);
+        this._signer.set(signer);
+        this._walletAddress.set(accounts[0]);
+        this._chainId.set(Number(network.chainId));
+        this._isConnected.set(true);
+
+        // Re-attach listeners
+        eth.on('accountsChanged', (changedAccounts: string[]) => {
+          this._walletAddress.set(changedAccounts[0] || null);
+          this._isConnected.set(changedAccounts.length > 0);
+        });
+
+        eth.on('chainChanged', (newChainId: string) => {
+          this._chainId.set(parseInt(newChainId, 16));
+        });
+      }
+    } catch (e) {
+      // Silently fail if we can't restore connection
+      console.warn('[Web3Service] Could not auto-restore wallet session:', e);
+    }
+  }
+
   async connectWallet(): Promise<string> {
     const eth = (window as Window & { ethereum?: { request: (args: unknown) => Promise<unknown>; on: (event: string, callback: (...args: unknown[]) => void) => void } }).ethereum;
 
