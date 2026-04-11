@@ -21,10 +21,10 @@ export class EarningsSummaryComponent {
   readonly barData: ChartConfiguration<'bar'>['data'] = {
     labels: this.labels,
     datasets: [
-      { label: 'Content Sales', data: [320, 420, 510, 640], backgroundColor: '#0EA5A1' },
-      { label: 'Royalties', data: [80, 120, 105, 146], backgroundColor: '#22D3EE' },
-      { label: 'Trading Fees', data: [140, 190, 230, 280], backgroundColor: '#F97316' },
-      { label: 'Rental Income', data: [70, 95, 130, 165], backgroundColor: '#A78BFA' }
+      { label: 'Content Sales', data: [0, 0, 0, 0], backgroundColor: '#0EA5A1' },
+      { label: 'Royalties', data: [0, 0, 0, 0], backgroundColor: '#22D3EE' },
+      { label: 'Trading Fees', data: [0, 0, 0, 0], backgroundColor: '#F97316' },
+      { label: 'Rental Income', data: [0, 0, 0, 0], backgroundColor: '#A78BFA' }
     ]
   };
 

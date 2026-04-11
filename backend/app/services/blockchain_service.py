@@ -96,7 +96,8 @@ class BlockchainService:
             metadata_uri,
         )
         receipt = self._send_tx(tx_func)
-        logs = self.agent_nft.events.AgentMinted().process_receipt(receipt)
+        import web3.logs
+        logs = self.agent_nft.events.AgentMinted().process_receipt(receipt, errors=web3.logs.IGNORE)
         token_id = int(logs[0]["args"]["tokenId"])
         tx_hash = receipt["transactionHash"].hex()
         return token_id, tx_hash

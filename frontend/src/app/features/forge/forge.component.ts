@@ -77,6 +77,10 @@ export class ForgeComponent {
   readonly canMint = computed(() => !!this.agentType() && !!this.specialization());
 
   selectType(value: AgentType): void {
+    if (value === 'trading') {
+      this.router.navigateByUrl('/trading');
+      return;
+    }
     this.agentType.set(value);
     this.specialization.set('');
   }

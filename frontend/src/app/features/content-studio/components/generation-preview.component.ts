@@ -17,7 +17,7 @@ type ContentType = 'image' | 'video' | 'text';
         <app-loading-spinner *ngIf="isGenerating" label="Generating output..."></app-loading-spinner>
 
         <ng-container *ngIf="!isGenerating && contentUrl">
-          <img *ngIf="contentType === 'image'" [src]="contentUrl" class="h-64 w-full rounded-lg object-cover" alt="Generated content" />
+          <img *ngIf="contentType === 'image'" [src]="contentUrl" class="h-64 w-full rounded-lg object-contain bg-[#0a1b29]" alt="Generated content" />
           <video *ngIf="contentType === 'video'" [src]="contentUrl" controls class="h-64 w-full rounded-lg object-cover"></video>
           <p *ngIf="contentType === 'text'" class="whitespace-pre-wrap text-slate-200">{{ contentText }}</p>
         </ng-container>

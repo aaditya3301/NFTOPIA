@@ -35,8 +35,8 @@ export class TypeSelectorComponent {
     {
       type: 'trading',
       kicker: 'Quant Class',
-      label: 'Trading Agent',
-      description: 'Execute strategy logic and earn performance fees from allocations.'
+      label: 'Build your own Trading Agent',
+      description: 'Design and custom-build your own trading strategy to earn performance fees from allocations.'
     }
   ];
 }

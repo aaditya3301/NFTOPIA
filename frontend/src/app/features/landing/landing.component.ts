@@ -1,4 +1,4 @@
-import { DecimalPipe, NgFor } from '@angular/common';
+import { DecimalPipe, NgFor, NgIf } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { interval, startWith } from 'rxjs';
@@ -12,7 +12,7 @@ import { AgentConfig } from '../../core/models/agent.model';
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [NgFor, DecimalPipe, AgentCardComponent],
+  imports: [NgIf, NgFor, DecimalPipe, AgentCardComponent],
   template: `
     <section class="mx-auto max-w-7xl space-y-10">
       <div class="grid grid-cols-1 gap-8 rounded-3xl border border-forge-border/60 bg-[#0a1724]/70 p-8 grid-noise md:grid-cols-[1.2fr_1fr]">
@@ -49,7 +49,7 @@ import { AgentConfig } from '../../core/models/agent.model';
           </div>
         </div>
 
-        <div class="relative overflow-hidden rounded-2xl border border-forge-border bg-[#0b1824] p-5">
+        <div *ngIf="featuredAgents.length > 0" class="relative overflow-hidden rounded-2xl border border-forge-border bg-[#0b1824] p-5">
           <div class="absolute -right-12 -top-16 h-40 w-40 rounded-full bg-forge-primary/20 blur-3xl"></div>
           <div class="absolute -bottom-10 -left-10 h-36 w-36 rounded-full bg-forge-secondary/20 blur-3xl"></div>
           <div class="relative space-y-4">
@@ -92,40 +92,7 @@ export class LandingComponent {
 
   readonly stats = signal({ agentsMinted: 0, forgeEarned: 0, contentTraded: 0 });
 
-  readonly featuredAgents: AgentConfig[] = [
-    {
-      tokenId: 42,
-      agentType: 'content',
-      specialization: 'cyberpunk_image_gen',
-      personalityPrompt: '',
-      styleParameters: {},
-      skillScores: [88, 71, 64, 79, 58],
-      level: 7,
-      totalEarnings: 12543.5,
-      jobsCompleted: 84,
-      reputationScore: 92,
-      traits: ['viral_instinct', 'niche_authority'],
-      tbaWalletAddress: '',
-      metadataURI: 'https://images.unsplash.com/photo-1510511233900-1982d92bd835?auto=format&fit=crop&w=900&q=80',
-      ownerAddress: ''
-    },
-    {
-      tokenId: 133,
-      agentType: 'trading',
-      specialization: 'momentum_trader',
-      personalityPrompt: '',
-      styleParameters: {},
-      skillScores: [52, 85, 82, 78, 90],
-      level: 9,
-      totalEarnings: 23101.4,
-      jobsCompleted: 201,
-      reputationScore: 95,
-      traits: ['antifragile', 'steady_hand'],
-      tbaWalletAddress: '',
-      metadataURI: 'https://images.unsplash.com/photo-1551281044-8b7b7f4f38b5?auto=format&fit=crop&w=900&q=80',
-      ownerAddress: ''
-    }
-  ];
+  readonly featuredAgents: AgentConfig[] = [];
 
   constructor() {
     interval(30000)
@@ -134,9 +101,7 @@ export class LandingComponent {
         this.market.getPlatformStats().subscribe({
           next: (res) => this.stats.set(res),
           error: () => {
-            if (this.stats().agentsMinted === 0) {
-              this.stats.set({ agentsMinted: 1248, forgeEarned: 892140, contentTraded: 3201 });
-            }
+             // Let it return zeroes if the backend fails instead of mock data
           }
         });
       });
