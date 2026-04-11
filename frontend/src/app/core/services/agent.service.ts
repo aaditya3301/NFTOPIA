@@ -127,12 +127,7 @@ export class AgentService {
       'anime_art',
       'photorealistic_portraits',
       'abstract_art',
-      'cinematic_video',
-      'lofi_aesthetic',
-      'seo_blog_writer',
-      'social_media_content',
-      'technical_writer',
-      'creative_fiction'
+      'lofi_aesthetic'
     ];
   }
 
