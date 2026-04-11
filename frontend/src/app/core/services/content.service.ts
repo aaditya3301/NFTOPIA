@@ -113,8 +113,11 @@ export class ContentService {
       .pipe(map((items) => items.map((item) => this.mapContent(item))));
   }
 
-  buyContent(contentId: string): Observable<unknown> {
-    return this.http.post(`${this.apiUrl}/marketplace/content/buy`, { content_id: contentId });
+  buyContent(contentId: string, bidAmount?: number): Observable<unknown> {
+    return this.http.post(`${this.apiUrl}/marketplace/content/buy`, { 
+      content_id: contentId,
+      bid_amount: bidAmount
+    });
   }
 
   tipContent(contentId: string, amount: number): Observable<unknown> {

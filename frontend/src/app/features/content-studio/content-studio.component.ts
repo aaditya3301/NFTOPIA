@@ -52,7 +52,7 @@ import { PromptAdvancedOptions, PromptInputComponent } from './components/prompt
           (viewMarketplace)="goMarketplace()"
           (viewAgent)="goAgent()"
         ></app-generation-preview>
-        <p class="px-1 text-xs text-nft-muted" *ngIf="generationDebug()">Debug: {{ generationDebug() }}</p>
+
 
         <app-content-history [items]="history()" (select)="selectHistoryItem($event)"></app-content-history>
       </div>

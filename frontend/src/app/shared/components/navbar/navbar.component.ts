@@ -11,11 +11,7 @@ import { WalletButtonComponent } from '../wallet-button/wallet-button.component'
       <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-6 lg:px-10">
         <!-- Brand -->
         <a routerLink="/" class="group flex items-center gap-2.5">
-          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-nft-darker text-white shadow-card">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 20V4l16 16V4"/>
-            </svg>
-          </div>
+          <img src="assets/nftopia-mark-large.svg" alt="NFTOPIA Logo" class="h-9 w-auto" />
           <span class="font-display text-lg font-extrabold tracking-tight text-nft-darker">NFTOPIA</span>
         </a>
 

@@ -34,11 +34,6 @@ import { AgentGridComponent } from './components/agent-grid.component';
           >Content</button>
           <button
             class="pill-tab"
-            [class]="tab() === 'agents' ? 'pill-tab--active' : 'pill-tab--inactive'"
-            (click)="tab.set('agents')"
-          >Agents</button>
-          <button
-            class="pill-tab"
             [class]="tab() === 'leaderboard' ? 'pill-tab--active' : 'pill-tab--inactive'"
             (click)="tab.set('leaderboard'); loadLeaderboard()"
           >Leaderboard</button>
@@ -46,16 +41,11 @@ import { AgentGridComponent } from './components/agent-grid.component';
       </header>
 
       <!-- Content Tab -->
-      <div class="grid grid-cols-1 items-start gap-7 lg:grid-cols-[260px_1fr]" *ngIf="tab() === 'content'">
+      <div *ngIf="tab() === 'content'" class="space-y-6">
         <app-filter-sidebar (changeFilters)="applyFilters($event)"></app-filter-sidebar>
         <div class="animate-fade-up">
           <app-content-grid [items]="filteredContent()" (bid)="openBidModal($event)"></app-content-grid>
         </div>
-      </div>
-
-      <!-- Agents Tab -->
-      <div *ngIf="tab() === 'agents'" class="animate-fade-up">
-        <app-agent-grid [agents]="filteredAgents()" (open)="openAgent($event)"></app-agent-grid>
       </div>
 
       <!-- Leaderboard Tab -->
@@ -115,7 +105,7 @@ export class MarketplaceComponent implements OnInit {
   private readonly web3 = inject(Web3Service);
   private readonly router = inject(Router);
 
-  readonly tab = signal<'content' | 'agents' | 'leaderboard'>('content');
+  readonly tab = signal<'content' | 'leaderboard'>('content');
   readonly selectedContent = signal<ContentGridItem | null>(null);
 
   private readonly filters = signal({
@@ -148,8 +138,7 @@ export class MarketplaceComponent implements OnInit {
         contentType: item.contentType as 'image'|'video'|'text',
         purchases: item.purchases || 0,
         contentId: item.contentId || '',
-        // Simulate bid data from purchases - each purchase raises the "bid"
-        highestBid: item.price + (item.purchases || 0) * 15,
+        highestBid: item.tips > 0 && item.tips > item.price ? item.tips : item.price,
         bidCount: item.purchases || 0
       }));
     });
@@ -239,7 +228,7 @@ export class MarketplaceComponent implements OnInit {
 
     // Record on backend
     if (item.contentId) {
-      this.contentService.buyContent(item.contentId).subscribe({
+      this.contentService.buyContent(item.contentId, bidAmount).subscribe({
         next: () => {
           this.notify.success(`Bid of ${bidAmount} $FORGE placed successfully on Agent #${item.agentId} content`);
           this.selectedContent.set(null);

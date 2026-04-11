@@ -214,6 +214,11 @@ async def buy_content(
 
     content.purchases += 1
     content.popularity_score += 2.0
+    
+    # Use tips_received to track the highest bid
+    if request.bid_amount is not None:
+        if request.bid_amount > content.tips_received and request.bid_amount > content.price_forge:
+            content.tips_received = float(request.bid_amount)
 
     db.add(
         AgentMemory(
@@ -222,7 +227,7 @@ async def buy_content(
             event_data={
                 "contentId": content.content_id,
                 "buyer": wallet.lower(),
-                "priceForge": content.price_forge,
+                "priceForge": request.bid_amount or content.price_forge,
             },
         )
     )

@@ -6,41 +6,39 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <aside class="glass-card--glow space-y-5 p-6 sticky top-28">
-      <h3 class="font-display text-lg font-bold text-nft-darker">Filters</h3>
-
-      <div>
-        <label class="mb-2 block text-xs font-bold uppercase tracking-[0.15em] text-slate-400">Content Type</label>
-        <select class="input-light" [(ngModel)]="contentType" (ngModelChange)="emitChange()">
-          <option value="">All</option>
+    <aside class="glass-card--glow flex flex-col sm:flex-row items-center gap-4 p-4 lg:p-6 mb-2">
+      <div class="flex-1 w-full sm:w-auto">
+        <label class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Content Type</label>
+        <select class="input-light !py-2 !text-sm" [(ngModel)]="contentType" (ngModelChange)="emitChange()">
+          <option value="">All Types</option>
           <option value="image">Image</option>
           <option value="video">Video</option>
           <option value="text">Text</option>
         </select>
       </div>
 
-      <div>
-        <label class="mb-2 block text-xs font-bold uppercase tracking-[0.15em] text-slate-400">Agent Type</label>
-        <select class="input-light" [(ngModel)]="agentType" (ngModelChange)="emitChange()">
-          <option value="">All</option>
-          <option value="content">Content</option>
-          <option value="trading">Trading</option>
+      <div class="flex-1 w-full sm:w-auto">
+        <label class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Origin</label>
+        <select class="input-light !py-2 !text-sm" [(ngModel)]="agentType" (ngModelChange)="emitChange()">
+          <option value="">All Creators</option>
+          <option value="content">Content Agents</option>
+          <option value="trading">Trading Agents</option>
         </select>
       </div>
 
-      <div>
-        <label class="mb-2 block text-xs font-bold uppercase tracking-[0.15em] text-slate-400">Sort</label>
-        <select class="input-light" [(ngModel)]="sort" (ngModelChange)="emitChange()">
-          <option value="trending">Trending</option>
-          <option value="newest">Newest</option>
-          <option value="price_low">Price: Low → High</option>
-          <option value="price_high">Price: High → Low</option>
+      <div class="flex-1 w-full sm:w-auto">
+        <label class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Sort By</label>
+        <select class="input-light !py-2 !text-sm" [(ngModel)]="sort" (ngModelChange)="emitChange()">
+          <option value="trending">Trending (Default)</option>
+          <option value="newest">Recently Minted</option>
+          <option value="price_low">Price: Low to High</option>
+          <option value="price_high">Price: High to Low</option>
         </select>
       </div>
     </aside>
   `,
   styles: [`
-    :host { display: block; height: 100%; }
+    :host { display: block; }
   `]
 })
 export class FilterSidebarComponent {

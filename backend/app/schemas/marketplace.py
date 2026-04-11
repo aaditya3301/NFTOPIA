@@ -14,6 +14,7 @@ class RentRequest(BaseModel):
 
 class BuyContentRequest(BaseModel):
     content_id: str
+    bid_amount: float = None
 
 
 class TipContentRequest(BaseModel):

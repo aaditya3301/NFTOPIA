@@ -24,25 +24,26 @@ import { ContentGridItem } from './content-grid.component';
             <span class="font-mono text-lg font-black text-nft-primary">{{ (item.highestBid || item.price) | number:'1.0-0' }} $FORGE</span>
           </div>
           <div class="flex justify-between text-sm">
-            <span class="text-forge-muted">Total bids placed</span>
-            <span class="text-white">{{ item.bidCount || 0 }}</span>
+          <div class="flex justify-between text-sm">
+            <span class="text-nft-muted">Total bids placed</span>
+            <span class="font-medium text-nft-text">{{ item.bidCount || 0 }}</span>
           </div>
           <div class="flex justify-between text-sm">
-            <span class="text-forge-muted">Auction ends in</span>
-            <span class="font-mono text-forge-warning">{{ timeRemaining }}</span>
+            <span class="text-nft-muted">Auction ends in</span>
+            <span class="font-mono font-medium text-amber-500">{{ timeRemaining }}</span>
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs uppercase text-forge-muted mb-1">Your bid amount ($FORGE)</label>
+        <div class="mt-6 w-full">
+          <label class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Your bid amount ($FORGE)</label>
           <input
             type="number"
             [min]="(item.highestBid || item.price) + 1"
-            class="w-full rounded-lg border border-forge-border bg-[#081726] p-3 text-sm text-white font-mono outline-none focus:border-forge-primary"
+            class="input-light !w-full !font-mono !text-base"
             [(ngModel)]="bidAmount"
             placeholder="Enter bid amount"
           />
-          <p class="text-xs text-forge-muted mt-1">Minimum bid: {{ ((item.highestBid || item.price) + 1) | number:'1.0-0' }} $FORGE</p>
+          <p class="text-xs text-slate-500 mt-2">Minimum bid is <span class="font-mono">{{ ((item.highestBid || item.price) + 1) | number:'1.0-0' }}</span> $FORGE.</p>
         </div>
 
         <div class="flex gap-3">
@@ -70,8 +71,28 @@ export class ContentDetailModalComponent implements OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['item'] && this.item) {
       this.bidAmount = (this.item.highestBid || this.item.price) + 10;
-      // Set auction end to 24 hours from now (simulated)
-      this.auctionEndTime = Date.now() + 24 * 60 * 60 * 1000;
+      
+      // Deterministic 7-day auction end time based on image string
+      const strId = this.item.image || String(this.item.agentId);
+      let hash = 0;
+      for (let i = 0; i < strId.length; i++) {
+        hash = ((hash << 5) - hash) + strId.charCodeAt(i);
+        hash |= 0;
+      }
+      
+      const seed = Math.abs(hash);
+      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+      // Pretend it was created somewhere in the past 7 days based on the seed
+      // Using modulo against current time to keep it stable yet moving down
+      const creationTime = Math.floor(Date.now() / sevenDaysMs) * sevenDaysMs + (seed % sevenDaysMs);
+      
+      // If creationTime is in the future relative to the interval, shift back one interval
+      let endTime = creationTime + sevenDaysMs;
+      if (endTime < Date.now()) {
+        endTime += sevenDaysMs; 
+      }
+      
+      this.auctionEndTime = endTime;
       this.startCountdown();
     }
   }
@@ -95,10 +116,21 @@ export class ContentDetailModalComponent implements OnChanges, OnDestroy {
 
   private updateTimeRemaining(): void {
     const diff = Math.max(0, this.auctionEndTime - Date.now());
-    const hours = Math.floor(diff / 3600000);
+    if (diff === 0) {
+       this.timeRemaining = 'Auction ended';
+       this.stopCountdown();
+       return;
+    }
+    const days = Math.floor(diff / (24 * 3600000));
+    const hours = Math.floor((diff % (24 * 3600000)) / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
-    this.timeRemaining = `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+    
+    if (days > 0) {
+      this.timeRemaining = `${days}d ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+    } else {
+      this.timeRemaining = `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+    }
   }
 
   placeBid(): void {
