@@ -40,6 +40,14 @@ async def get_agents_by_owner(owner_address: str, db: AsyncSession = Depends(get
     return result.scalars().all()
 
 
+@router.get("/leaderboard/global")
+async def get_leaderboard(limit: int = 50, db: AsyncSession = Depends(get_db_session)):
+    result = await db.execute(
+        select(AgentConfig).order_by(AgentConfig.reputation_score.desc()).limit(limit)
+    )
+    return result.scalars().all()
+
+
 @router.get("/{token_id}/memory")
 async def get_agent_memory(token_id: int, db: AsyncSession = Depends(get_db_session)):
     result = await db.execute(
