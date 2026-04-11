@@ -44,12 +44,12 @@ import { CustomBotConfig } from '../../../core/models/trade.model';
 
       <label class="block text-sm text-forge-muted">Training Period</label>
       <select class="w-full rounded-lg border border-forge-border bg-[#081726] p-2" [(ngModel)]="form.trainingPeriod">
-        <option value="3m">3 months</option>
-        <option value="6m">6 months</option>
-        <option value="12m">1 year</option>
+        <option value="5d">5 Days</option>
+        <option value="15d">15 Days</option>
+        <option value="1m">1 Month</option>
       </select>
 
-      <button class="btn-forge" (click)="submit()">Start RL Training</button>
+      <button class="btn-forge w-full" (click)="submit()">MINT TRADING AGENT</button>
     </div>
   `
 })
@@ -63,7 +63,7 @@ export class CustomBotBuilderComponent {
     assets: ['BTC', 'ETH'],
     goal: 'maximize_returns',
     riskTolerance: 'medium',
-    trainingPeriod: '6m'
+    trainingPeriod: '15d'
   };
 
   submit(): void {
