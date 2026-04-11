@@ -1,4 +1,5 @@
 import { NgIf } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -43,8 +44,12 @@ import { TypeSelectorComponent } from './components/type-selector.component';
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <button class="btn-forge" (click)="forge()" [disabled]="isMinting() || !canMint()">FORGE THIS AGENT</button>
+          <button class="btn-ghost" (click)="connectWallet()" *ngIf="!web3.isConnected()" [disabled]="isConnecting() || isMinting()">
+            {{ isConnecting() ? 'Connecting...' : 'CONNECT WALLET' }}
+          </button>
+          <button class="btn-forge" (click)="forge()" [disabled]="isMinting() || isConnecting()">FORGE THIS AGENT</button>
           <app-loading-spinner *ngIf="isMinting()" label="Minting and finalizing on-chain DNA..."></app-loading-spinner>
+          <p class="text-xs text-forge-muted" *ngIf="!canMint()">Choose both agent type and specialization before forging.</p>
         </div>
       </div>
     </section>
@@ -53,12 +58,13 @@ import { TypeSelectorComponent } from './components/type-selector.component';
 export class ForgeComponent {
   private readonly agentService = inject(AgentService);
   private readonly notify = inject(NotificationService);
-  private readonly web3 = inject(Web3Service);
+  readonly web3 = inject(Web3Service);
   private readonly router = inject(Router);
 
   readonly agentType = signal<AgentType | null>(null);
   readonly specialization = signal('');
   readonly isMinting = signal(false);
+  readonly isConnecting = signal(false);
 
   readonly specializations = computed(() =>
     this.agentType() === 'content'
@@ -75,13 +81,44 @@ export class ForgeComponent {
     this.specialization.set('');
   }
 
-  forge(): void {
+  async connectWallet(): Promise<void> {
+    if (this.web3.isConnected()) {
+      return;
+    }
+
+    this.isConnecting.set(true);
+    try {
+      await this.web3.connectWallet();
+      this.notify.success('Wallet connected');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Wallet connection failed';
+      this.notify.error(message);
+    } finally {
+      this.isConnecting.set(false);
+    }
+  }
+
+  private async ensureWalletConnected(): Promise<string | null> {
     const wallet = this.web3.walletAddress();
+    if (wallet) {
+      return wallet;
+    }
+
+    await this.connectWallet();
+    return this.web3.walletAddress();
+  }
+
+  async forge(): Promise<void> {
+    const wallet = await this.ensureWalletConnected();
     const selectedType = this.agentType();
     const selectedSpecialization = this.specialization();
 
     if (!wallet || !selectedType || !selectedSpecialization) {
-      this.notify.warning('Complete all steps before minting');
+      if (!wallet) {
+        this.notify.warning('Connect your wallet to continue');
+      } else {
+        this.notify.warning('Complete all steps before minting');
+      }
       return;
     }
 
@@ -101,8 +138,9 @@ export class ForgeComponent {
           const nextRoute = selectedType === 'content' ? `/studio/${res.tokenId}` : '/trading';
           this.router.navigateByUrl(nextRoute);
         },
-        error: () => {
-          this.notify.error('Forge failed. Check backend and contract configuration.');
+        error: (error: HttpErrorResponse) => {
+          const detail = typeof error.error?.detail === 'string' ? error.error.detail : error.message;
+          this.notify.error(`Forge failed: ${detail}`);
         }
       });
   }

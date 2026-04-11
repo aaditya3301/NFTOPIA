@@ -13,6 +13,7 @@ export interface GenerationResponse {
   contentType: string;
   metadataURI: string;
   txHash: string;
+  debugInfo?: Record<string, unknown>;
 }
 
 export interface ContentNft {

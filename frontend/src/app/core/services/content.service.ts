@@ -14,6 +14,7 @@ interface BackendGenerationResponse {
   metadata_uri?: string;
   content_nft_token_id?: number | null;
   tx_hash?: string;
+  debug_info?: Record<string, unknown>;
 }
 
 interface BackendContentNft {
@@ -42,24 +43,39 @@ interface BackendMintResponse {
 export class ContentService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
+  /** Backend origin (e.g. http://localhost:8000) for resolving relative asset paths */
+  private readonly backendBase = environment.apiUrl.replace(/\/api\/?$/, '');
+
+  /**
+   * If the URL is a relative path served by the backend (e.g. /generated/abc.png),
+   * prepend the backend origin so the browser can load it.
+   */
+  private resolveContentUrl(url: string): string {
+    if (!url) return url;
+    // Already absolute (data: URI, http/https URL)
+    if (/^(https?:|data:)/i.test(url)) return url;
+    // Relative path from backend — prepend the base
+    return `${this.backendBase}${url.startsWith('/') ? '' : '/'}${url}`;
+  }
 
   private mapGenerationResponse(item: BackendGenerationResponse): GenerationResponse {
     return {
       contentId: item.content_id,
-      contentUrl: item.content_url,
+      contentUrl: this.resolveContentUrl(item.content_url),
       contentNftTokenId: item.content_nft_token_id ?? 0,
       agentId: item.agent_token_id,
       prompt: item.prompt,
       contentType: item.content_type,
       metadataURI: item.metadata_uri ?? '',
-      txHash: item.tx_hash ?? ''
+      txHash: item.tx_hash ?? '',
+      debugInfo: item.debug_info
     };
   }
 
   private mapContent(item: BackendContentNft): ContentNft {
     return {
       tokenId: item.content_nft_token_id ?? 0,
-      contentUrl: item.content_url,
+      contentUrl: this.resolveContentUrl(item.content_url),
       contentType: item.content_type,
       creatorAgent: item.agent_token_id,
       creatorOwner: item.creator_address,

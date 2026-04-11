@@ -16,6 +16,7 @@ class GenerationResponse(BaseModel):
     metadata_uri: str | None = None
     content_nft_token_id: int | None = None
     tx_hash: str | None = None
+    debug_info: dict | None = None
 
 
 class MintContentRequest(BaseModel):

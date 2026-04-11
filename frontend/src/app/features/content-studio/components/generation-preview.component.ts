@@ -43,6 +43,14 @@ type ContentType = 'image' | 'video' | 'text';
           $FORGE
         </label>
       </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-3" *ngIf="contentUrl">
+        <button class="btn-forge" (click)="mintNow.emit()" [disabled]="minting || isMinted" *ngIf="showMintAction">
+          {{ minting ? 'Minting...' : isMinted ? 'Minted' : 'Mint Now' }}
+        </button>
+        <button class="btn-ghost" (click)="viewMarketplace.emit()">Open Marketplace</button>
+        <button class="btn-ghost" (click)="viewAgent.emit()">View Agent</button>
+      </div>
     </div>
   `
 })
@@ -53,6 +61,12 @@ export class GenerationPreviewComponent {
   @Input() contentText = '';
   @Input() mintAsNft = true;
   @Input() priceForge = 120;
+  @Input() showMintAction = false;
+  @Input() minting = false;
+  @Input() isMinted = false;
   @Output() mintAsNftChange = new EventEmitter<boolean>();
   @Output() priceForgeChange = new EventEmitter<number>();
+  @Output() mintNow = new EventEmitter<void>();
+  @Output() viewMarketplace = new EventEmitter<void>();
+  @Output() viewAgent = new EventEmitter<void>();
 }

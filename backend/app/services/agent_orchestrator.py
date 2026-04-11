@@ -1,5 +1,6 @@
 import random
 
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.agent import AgentConfig
@@ -48,18 +49,23 @@ class AgentOrchestrator:
         tba_address = None
 
         if blockchain.account and blockchain.agent_nft and blockchain.erc6551_registry:
-            agent_type_int = 0 if request.agent_type == "content" else 1
-            token_id, tx_hash = blockchain.mint_agent(
-                to_address=request.owner_address,
-                agent_type=agent_type_int,
-                specialization=request.specialization,
-                initial_skills=skills,
-                metadata_uri=metadata_uri,
-            )
-            tba_address = blockchain.create_tba(token_id)
-            blockchain.set_tba_wallet(token_id, tba_address)
+            try:
+                agent_type_int = 0 if request.agent_type == "content" else 1
+                token_id, tx_hash = blockchain.mint_agent(
+                    to_address=request.owner_address,
+                    agent_type=agent_type_int,
+                    specialization=request.specialization,
+                    initial_skills=skills,
+                    metadata_uri=metadata_uri,
+                )
+                tba_address = blockchain.create_tba(token_id)
+                blockchain.set_tba_wallet(token_id, tba_address)
+            except Exception:
+                token_id = await self._next_offchain_token_id(db)
+                tx_hash = None
+                tba_address = None
         else:
-            token_id = random.randint(900000, 999999)
+            token_id = await self._next_offchain_token_id(db)
 
         agent = AgentConfig(
             token_id=token_id,
@@ -101,6 +107,13 @@ class AgentOrchestrator:
             "nftVisualUrl": metadata_uri,
             "txHash": tx_hash,
         }
+
+    async def _next_offchain_token_id(self, db: AsyncSession) -> int:
+        result = await db.execute(select(func.max(AgentConfig.token_id)))
+        current = result.scalar() or 0
+        if current < 900000:
+            return 900000 + random.randint(1, 1000)
+        return int(current) + 1
 
     def _generate_personality(self, specialization: str) -> str:
         seeds = self.PERSONALITY_SEEDS.get(specialization, ["A skilled AI agent"])

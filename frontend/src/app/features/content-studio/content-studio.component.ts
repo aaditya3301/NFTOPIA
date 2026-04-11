@@ -1,6 +1,7 @@
 import { NgIf } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ContentNft } from '../../core/models/content.model';
 import { ContentService } from '../../core/services/content.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -42,7 +43,14 @@ import { PromptAdvancedOptions, PromptInputComponent } from './components/prompt
           [contentText]="generatedText()"
           [(mintAsNft)]="mintAsNft"
           [(priceForge)]="priceForge"
+          [showMintAction]="!!lastContentId()"
+          [minting]="isMinting()"
+          [isMinted]="isMinted()"
+          (mintNow)="mintLatestContent()"
+          (viewMarketplace)="goMarketplace()"
+          (viewAgent)="goAgent()"
         ></app-generation-preview>
+        <p class="px-1 text-xs text-forge-muted" *ngIf="generationDebug()">Debug: {{ generationDebug() }}</p>
 
         <app-content-history [items]="history()" (select)="selectHistoryItem($event)"></app-content-history>
       </div>
@@ -51,14 +59,19 @@ import { PromptAdvancedOptions, PromptInputComponent } from './components/prompt
 })
 export class ContentStudioComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly content = inject(ContentService);
   private readonly notify = inject(NotificationService);
 
   readonly agentId = Number(this.route.snapshot.paramMap.get('agentId') || 0);
   readonly contentType = signal<'image' | 'video' | 'text'>('image');
   readonly isGenerating = signal(false);
+  readonly isMinting = signal(false);
+  readonly isMinted = signal(false);
   readonly generatedUrl = signal('');
   readonly generatedText = signal('');
+  readonly generationDebug = signal('');
+  readonly lastContentId = signal<string | null>(null);
   readonly history = signal<ContentNft[]>([]);
   readonly credits = signal(18);
 
@@ -112,30 +125,58 @@ export class ContentStudioComponent {
         next: (res) => {
           this.isGenerating.set(false);
           this.generatedUrl.set(res.contentUrl);
-          this.generatedText.set(this.contentType() === 'text' ? 'Generated text content is available via URL metadata.' : '');
+          this.generatedText.set(this.contentType() === 'text' ? 'Generated text content is available via URL metadata.' : 'Generated preview based on your prompt.');
+          this.generationDebug.set(this.buildDebugLabel(res.debugInfo));
+          this.lastContentId.set(res.contentId || null);
+          this.isMinted.set(false);
           this.credits.update((current) => Math.max(0, current - 1));
 
           if (this.mintAsNft && res.contentId) {
-            this.content.mintContent(res.contentId, this.priceForge).subscribe({
-              next: () => {
-                this.notify.success('Content generated and minted to marketplace successfully');
-                this.refreshHistory();
-              },
-              error: () => {
-                this.notify.warning('Content generated but minting failed');
-                this.refreshHistory();
-              }
-            });
+            this.mintLatestContent(true);
           } else {
             this.notify.success('Content generated successfully');
             this.refreshHistory();
           }
         },
-        error: () => {
+        error: (error: HttpErrorResponse) => {
           this.isGenerating.set(false);
-          this.notify.error('Generation failed. Verify backend and Gemini setup.');
+          this.generationDebug.set('request_failed');
+          const detail = typeof error.error?.detail === 'string' ? error.error.detail : 'Verify backend and Gemini setup.';
+          this.notify.error(`Generation failed: ${detail}`);
         }
       });
+  }
+
+  mintLatestContent(isAuto = false): void {
+    const contentId = this.lastContentId();
+    if (!contentId) {
+      this.notify.warning('Generate content first, then mint.');
+      return;
+    }
+
+    this.isMinting.set(true);
+    this.content.mintContent(contentId, this.priceForge).subscribe({
+      next: () => {
+        this.isMinting.set(false);
+        this.isMinted.set(true);
+        this.notify.success(isAuto ? 'Content generated and minted to marketplace successfully' : 'Content minted to marketplace successfully');
+        this.refreshHistory();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.isMinting.set(false);
+        const detail = typeof error.error?.detail === 'string' ? error.error.detail : 'Minting failed.';
+        this.notify.error(`Mint failed: ${detail}`);
+        this.refreshHistory();
+      }
+    });
+  }
+
+  goMarketplace(): void {
+    this.router.navigateByUrl('/marketplace');
+  }
+
+  goAgent(): void {
+    this.router.navigate(['/agent', this.agentId]);
   }
 
   private refreshHistory(): void {
@@ -150,7 +191,20 @@ export class ContentStudioComponent {
 
   selectHistoryItem(item: ContentNft): void {
     this.generatedUrl.set(item.contentUrl);
-    this.generatedText.set(item.contentType === 'text' ? 'Previously generated text content selected.' : '');
+    this.generatedText.set(item.contentType === 'text' ? 'Previously generated text content selected.' : 'Generated preview based on your prompt.');
+    this.generationDebug.set('history_item');
     this.contentType.set(item.contentType as 'image' | 'video' | 'text');
+    this.lastContentId.set(item.contentId ?? null);
+    this.isMinted.set(Boolean(item.tokenId && item.tokenId > 0));
+  }
+
+  private buildDebugLabel(debugInfo?: Record<string, unknown>): string {
+    if (!debugInfo) {
+      return 'no_debug_info';
+    }
+
+    const source = String(debugInfo['source'] ?? 'unknown');
+    const reason = debugInfo['reason'];
+    return reason ? `${source} (${String(reason)})` : source;
   }
 }

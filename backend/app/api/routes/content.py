@@ -25,6 +25,8 @@ async def generate_content(request: GenerationRequest, db: AsyncSession = Depend
         return await engine.generate(agent, request, db)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Content generation failed: {exc}") from exc
 
 
 @router.get("/agent/{agent_id}")

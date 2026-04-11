@@ -15,7 +15,7 @@ class ContentOutput(Base):
 
     content_type: Mapped[str] = mapped_column(String(20), nullable=False)
     prompt: Mapped[str] = mapped_column(Text, nullable=False)
-    content_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    content_url: Mapped[str] = mapped_column(Text, nullable=False)
     content_nft_token_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     price_forge: Mapped[float] = mapped_column(Float, default=0)
