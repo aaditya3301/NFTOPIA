@@ -29,35 +29,44 @@ import { TradeLogTableComponent } from './components/trade-log-table.component';
     TradeLogTableComponent
   ],
   template: `
-    <section class="mx-auto max-w-7xl space-y-6">
-      <header class="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 class="font-display text-4xl text-white">Trading Dashboard</h1>
-          <p class="text-forge-muted">Allocate capital to verified bots or build your own trading agent.</p>
+    <section class="mx-auto max-w-7xl space-y-7">
+      <header class="flex flex-wrap items-end justify-between gap-4">
+        <div class="page-header">
+          <p class="section-kicker">Invest</p>
+          <h1>Trading Dashboard</h1>
+          <p>Allocate capital to verified bots or train your own RL model.</p>
         </div>
-        <div class="rounded-xl border border-forge-border bg-forge-card/70 p-1">
-          <button class="px-3 py-2 text-sm" [class.text-white]="tab() === 'market'" (click)="tab.set('market')">Marketplace Bots</button>
-          <button class="px-3 py-2 text-sm" [class.text-white]="tab() === 'build'" (click)="tab.set('build')">Build Your Own</button>
+        <div class="pill-tabs">
+          <button
+            class="pill-tab"
+            [class]="tab() === 'market' ? 'pill-tab--active' : 'pill-tab--inactive'"
+            (click)="tab.set('market')"
+          >Marketplace Bots</button>
+          <button
+            class="pill-tab"
+            [class]="tab() === 'build' ? 'pill-tab--active' : 'pill-tab--inactive'"
+            (click)="tab.set('build')"
+          >Build Your Own</button>
         </div>
       </header>
 
       <div class="space-y-4" *ngIf="tab() === 'market'">
-        <div class="glass-card border-b border-forge-border p-4">
+        <div class="glass-card p-4">
           <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
-            <input class="rounded-lg border border-forge-border bg-[#091a27] px-3 py-2 text-sm text-slate-100 outline-none" placeholder="Strategy" [(ngModel)]="strategyFilter" />
-            <select class="rounded-lg border border-forge-border bg-[#091a27] px-3 py-2 text-sm text-slate-100" [(ngModel)]="riskFilter">
+            <input class="input-light" placeholder="Strategy" [(ngModel)]="strategyFilter" />
+            <select class="input-light" [(ngModel)]="riskFilter">
               <option value="">All risk levels</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
-            <select class="rounded-lg border border-forge-border bg-[#091a27] px-3 py-2 text-sm text-slate-100" [(ngModel)]="trackRecordFilter">
+            <select class="input-light" [(ngModel)]="trackRecordFilter">
               <option value="">Any track record</option>
               <option value="7">7d+</option>
               <option value="30">30d+</option>
               <option value="90">90d+</option>
             </select>
-            <select class="rounded-lg border border-forge-border bg-[#091a27] px-3 py-2 text-sm text-slate-100" [(ngModel)]="sortBy" (ngModelChange)="sortLeaderboard()">
+            <select class="input-light" [(ngModel)]="sortBy" (ngModelChange)="sortLeaderboard()">
               <option value="returns">Sort: Returns</option>
               <option value="consistency">Sort: Consistency</option>
               <option value="popularity">Sort: Popularity</option>
@@ -119,9 +128,7 @@ export class TradingComponent implements OnInit, OnDestroy {
     this.loadLeaderboard();
   }
 
-  constructor() {
-    this.tab.set('build');
-  }
+  constructor() {}
 
   ngOnDestroy(): void {
     this.tradingFeedSub?.unsubscribe();

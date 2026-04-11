@@ -21,15 +21,16 @@ import { TradingAgentMonitorComponent } from './components/trading-agent-monitor
     TradingAgentMonitorComponent
   ],
   template: `
-    <section class="mx-auto max-w-7xl space-y-6">
-      <h1 class="font-display text-4xl text-white">My Empire</h1>
+    <section class="mx-auto max-w-7xl space-y-8">
+      <header class="page-header">
+        <p class="section-kicker">Overview</p>
+        <h1>My Empire</h1>
+      </header>
 
       <app-portfolio-overview [agentsOwned]="agents.length.toString()" forgeBalance="0 $FORGE" allTimeEarnings="0 $FORGE" passiveRate="0 $FORGE"></app-portfolio-overview>
-
       <app-agent-roster *ngIf="agents.length > 0" [agents]="agents"></app-agent-roster>
-
-      <div *ngIf="agents.length === 0" class="glass-card flex flex-col items-center justify-center py-12 text-center">
-         <p class="text-forge-muted text-lg mb-2">You don't own any agents yet.</p>
+      <div *ngIf="agents.length === 0" class="glass-card--glow flex flex-col items-center justify-center py-12 text-center">
+         <p class="text-slate-500 text-lg mb-2">You don't own any agents yet.</p>
          <a href="/forge" class="btn-forge">Go to Forge</a>
       </div>
 
@@ -40,31 +41,33 @@ import { TradingAgentMonitorComponent } from './components/trading-agent-monitor
       ></app-trading-agent-monitor>
 
       <!-- Allocate Funds Modal -->
-      <div *ngIf="allocatingAgent()" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" (click)="allocatingAgent.set(null)">
-        <div class="glass-card w-full max-w-md p-6 space-y-4" (click)="$event.stopPropagation()">
-          <h3 class="font-display text-xl text-white">Allocate Funds</h3>
-          <p class="text-sm text-slate-300">Agent #{{ allocatingAgent()!.tokenId }} -- {{ allocatingAgent()!.specialization }}</p>
+      <div *ngIf="allocatingAgent()" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" (click)="allocatingAgent.set(null)">
+        <div class="glass-card w-full max-w-md p-6 space-y-5" (click)="$event.stopPropagation()">
+          <h3 class="font-display text-xl font-bold text-nft-text">Allocate Funds</h3>
+          <p class="text-sm text-nft-muted">Agent #{{ allocatingAgent()!.tokenId }} -- {{ allocatingAgent()!.specialization }}</p>
 
           <div>
-            <label class="block text-xs uppercase text-forge-muted mb-1">Amount ($FORGE)</label>
+            <label class="block text-xs uppercase font-semibold text-nft-muted mb-1.5">Amount ($FORGE)</label>
             <input
               type="number"
-              class="w-full rounded-lg border border-forge-border bg-[#081726] p-3 text-sm text-white font-mono outline-none focus:border-forge-primary"
+              class="input-light font-mono"
               [(ngModel)]="allocateAmount"
               placeholder="Enter amount to allocate"
               min="1"
             />
           </div>
 
-          <div class="flex gap-3">
-            <button class="btn-ghost flex-1" (click)="allocatingAgent.set(null)">Cancel</button>
-            <button class="btn-forge flex-1" (click)="confirmAllocate()" [disabled]="!allocateAmount || allocateAmount <= 0">Allocate</button>
+          <div class="flex gap-3 pt-2">
+            <button class="btn-ghost flex-1 !rounded-full" (click)="allocatingAgent.set(null)">Cancel</button>
+            <button class="btn-forge flex-1 !rounded-full" (click)="confirmAllocate()" [disabled]="!allocateAmount || allocateAmount <= 0">Allocate</button>
           </div>
         </div>
       </div>
 
-      <app-earnings-summary></app-earnings-summary>
-      <app-activity-feed [items]="activityItems"></app-activity-feed>
+      <div class="grid grid-cols-1 gap-7 lg:grid-cols-[1.2fr_1fr]">
+        <app-earnings-summary></app-earnings-summary>
+        <app-activity-feed [items]="activityItems"></app-activity-feed>
+      </div>
     </section>
   `
 })
@@ -73,7 +76,10 @@ export class DashboardComponent {
   private web3Service = inject(Web3Service);
   private notify = inject(NotificationService);
 
-  readonly activityItems: string[] = [];
+  readonly activityItems: string[] = [
+    'System initialized',
+    'Waiting for real-time events...'
+  ];
   readonly allocatingAgent = signal<AgentConfig | null>(null);
 
   agents: AgentConfig[] = [];

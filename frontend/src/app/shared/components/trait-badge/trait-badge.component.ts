@@ -4,7 +4,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-trait-badge',
   standalone: true,
   template: `
-    <span class="rounded-full border border-forge-primary/40 bg-forge-primary/10 px-2 py-0.5 text-xs text-forge-primary">
+    <span class="rounded-full bg-nft-secondary/10 px-2.5 py-1 text-xs font-medium text-nft-secondary">
       {{ trait }}
     </span>
   `

@@ -8,13 +8,13 @@ import { DnaVisualizerComponent } from '../../../shared/components/dna-visualize
   imports: [NgIf, DnaVisualizerComponent],
   template: `
     <div class="glass-card p-5" *ngIf="specialization">
-      <p class="text-xs uppercase text-forge-muted">DNA Preview</p>
-      <h3 class="mt-1 font-display text-xl text-white">{{ specialization }}</h3>
-      <p class="mt-2 text-sm text-slate-300">{{ personality }}</p>
+      <p class="text-xs font-semibold uppercase tracking-wider text-nft-muted">DNA Preview</p>
+      <h3 class="mt-1 font-display text-xl font-bold text-nft-text">{{ specialization }}</h3>
+      <p class="mt-2 text-sm text-nft-text-secondary">{{ personality }}</p>
       <div class="mt-4">
         <app-dna-visualizer [skillScores]="scores"></app-dna-visualizer>
       </div>
-      <p class="mt-4 text-xs text-forge-muted">Estimated mint cost: {{ estimatedMintCost }} HLUSD</p>
+      <p class="mt-4 text-xs text-nft-muted">Estimated mint cost: {{ estimatedMintCost }} HLUSD</p>
     </div>
   `
 })

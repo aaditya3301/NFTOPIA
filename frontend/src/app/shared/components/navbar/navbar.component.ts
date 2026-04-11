@@ -7,27 +7,77 @@ import { WalletButtonComponent } from '../wallet-button/wallet-button.component'
   standalone: true,
   imports: [RouterLink, RouterLinkActive, WalletButtonComponent],
   template: `
-    <header class="fixed inset-x-0 top-0 z-40 border-b border-forge-border/80 bg-[#06111add] backdrop-blur-xl">
-      <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-10">
-        <a routerLink="/" class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-forge-primary to-forge-secondary"></div>
-          <div>
-            <p class="font-display text-base font-semibold tracking-wide text-white">AgentForge</p>
-            <p class="text-xs text-forge-muted">Mint. Evolve. Earn.</p>
+    <header class="fixed inset-x-0 top-0 z-50 border-b border-nft-border/40 bg-white/70 backdrop-blur-2xl transition-all">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-6 lg:px-10">
+        <!-- Brand -->
+        <a routerLink="/" class="group flex items-center gap-2.5">
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-nft-darker text-white shadow-card">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20V4l16 16V4"/>
+            </svg>
           </div>
+          <span class="font-display text-lg font-extrabold tracking-tight text-nft-darker">NFTOPIA</span>
         </a>
 
-        <nav class="hidden items-center gap-5 text-sm text-slate-300 md:flex">
-          <a routerLink="/forge" routerLinkActive="text-white" class="hover:text-white">Forge</a>
-          <a routerLink="/marketplace" routerLinkActive="text-white" class="hover:text-white">Marketplace</a>
-          <a routerLink="/trading" routerLinkActive="text-white" class="hover:text-white">Trading</a>
-          <a routerLink="/dashboard" routerLinkActive="text-white" class="hover:text-white">My Empire</a>
-          <a routerLink="/rental" routerLinkActive="text-white" class="hover:text-white">Rental</a>
+        <!-- Nav Links — matching OLD navbar order -->
+        <nav class="hidden items-center gap-1 md:flex">
+          <a routerLink="/forge" routerLinkActive="nav-link--active" class="nav-link">Forge</a>
+          <a routerLink="/marketplace" routerLinkActive="nav-link--active" class="nav-link">Marketplace</a>
+          <a routerLink="/trading" routerLinkActive="nav-link--active" class="nav-link">Trading</a>
+          <a routerLink="/dashboard" routerLinkActive="nav-link--active" class="nav-link">My Empire</a>
+          <a routerLink="/rental" routerLinkActive="nav-link--active" class="nav-link">Rental</a>
         </nav>
 
-        <app-wallet-button></app-wallet-button>
+        <!-- Actions -->
+        <div class="flex items-center gap-3">
+          <app-wallet-button></app-wallet-button>
+        </div>
       </div>
     </header>
-  `
+  `,
+  styles: [`
+    .nav-link {
+      position: relative;
+      padding: 6px 2px;
+      margin: 0 14px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #64748B;
+      transition: all 0.2s ease;
+      letter-spacing: 0.01em;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #0F172A;
+      border-radius: 2px;
+      transform: scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-link:hover {
+      color: #0F172A;
+    }
+
+    .nav-link:hover::after {
+      transform: scaleX(0.3);
+      opacity: 0.5;
+    }
+
+    .nav-link--active {
+      color: #0F172A !important;
+      font-weight: 700;
+    }
+    
+    .nav-link--active::after {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  `]
 })
 export class NavbarComponent {}

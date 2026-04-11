@@ -17,24 +17,29 @@ export interface ContentGridItem {
   standalone: true,
   imports: [NgFor, NgIf, DecimalPipe],
   template: `
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" *ngIf="items.length > 0">
-      <article *ngFor="let item of items" class="glass-card overflow-hidden">
-        <img [src]="item.image" class="h-52 w-full object-cover" alt="Content preview" />
-        <div class="space-y-2 p-4">
-          <p class="line-clamp-2 text-sm text-slate-200">{{ item.prompt }}</p>
-          <p class="text-xs text-forge-muted">Creator Agent #{{ item.agentId }}</p>
+    <div class="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3" *ngIf="items.length > 0">
+      <article *ngFor="let item of items; let i = index" class="glass-card--glow overflow-hidden group transition-all duration-500 hover:-translate-y-2" [style.animation-delay.ms]="i * 80">
+        <div class="overflow-hidden relative">
+          <img [src]="item.image" class="h-56 w-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Content preview" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
+             <button class="btn-forge w-full !py-2 !text-xs !rounded-xl translate-y-4 group-hover:translate-y-0 transition-transform duration-500" (click)="bid.emit(item)">Place Bid</button>
+          </div>
+        </div>
+        <div class="space-y-3 p-5">
+          <p class="line-clamp-2 text-sm font-semibold text-nft-text leading-snug">{{ item.prompt }}</p>
           <div class="flex items-center justify-between">
-            <div>
-              <span class="font-mono text-forge-secondary">{{ (item.highestBid || item.price) | number:'1.0-0' }} $FORGE</span>
-              <span class="ml-2 text-xs text-forge-muted" *ngIf="item.bidCount">{{ item.bidCount }} bids</span>
-            </div>
-            <button class="btn-forge !px-4 !py-2 text-xs" (click)="bid.emit(item)">Bid</button>
+            <p class="text-[10px] uppercase tracking-wider font-bold text-nft-muted">Agent #{{ item.agentId }}</p>
+            <span class="text-[10px] font-mono font-bold text-nft-primary bg-nft-primary/10 px-2 py-0.5 rounded-full" *ngIf="item.bidCount">{{ item.bidCount }} Bids</span>
+          </div>
+          <div class="flex items-center justify-between pt-1 border-t border-nft-border/30">
+            <span class="font-mono text-sm font-black text-nft-primary">{{ (item.highestBid || item.price) | number:'1.0-0' }} $FORGE</span>
+            <button class="btn-ghost !px-3.5 !py-1.5 !text-[11px] !rounded-full font-bold" (click)="bid.emit(item)">View Details</button>
           </div>
         </div>
       </article>
     </div>
-    <div *ngIf="items.length === 0" class="glass-card p-8 text-center">
-      <p class="text-forge-muted">No content listed yet. Forge an agent and generate images to get started.</p>
+    <div *ngIf="items.length === 0" class="glass-card--glow p-12 text-center animate-fade-up">
+      <p class="text-nft-muted font-medium">No content listed yet. Forge an agent and generate images to get started.</p>
     </div>
   `
 })

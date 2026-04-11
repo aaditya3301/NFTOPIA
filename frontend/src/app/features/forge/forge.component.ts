@@ -17,20 +17,23 @@ import { TypeSelectorComponent } from './components/type-selector.component';
   standalone: true,
   imports: [NgIf, TypeSelectorComponent, SpecializationPickerComponent, DnaPreviewComponent, LoadingSpinnerComponent],
   template: `
-    <section class="mx-auto max-w-5xl space-y-6">
-      <header class="space-y-2">
-        <h1 class="font-display text-4xl text-white">Forge New Agent</h1>
-        <p class="text-forge-muted">Choose your agent class, specialization, and mint your AI business as an NFT.</p>
+    <section class="mx-auto max-w-5xl space-y-7">
+      <header class="page-header">
+        <p class="section-kicker">Create</p>
+        <h1>Forge New Agent</h1>
+        <p>Choose your agent class, specialization, and mint your AI business as an NFT.</p>
       </header>
 
-      <div class="glass-card space-y-6 p-6">
-        <div>
-          <p class="mb-3 text-xs uppercase text-forge-muted">Step 1 · Type</p>
+      <div class="glass-card--glow space-y-8 p-8 sm:p-10">
+        <!-- Step 1 -->
+        <div class="animate-fade-up">
+          <p class="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-400">Step 1 · Choose Type</p>
           <app-type-selector [selection]="agentType()" (select)="selectType($event)"></app-type-selector>
         </div>
 
-        <div *ngIf="agentType()">
-          <p class="mb-3 text-xs uppercase text-forge-muted">Step 2 · Specialization</p>
+        <!-- Step 2 -->
+        <div *ngIf="agentType()" class="animate-fade-up">
+          <p class="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-400">Step 2 · Specialization</p>
           <app-specialization-picker
             [options]="specializations()"
             [selected]="specialization()"
@@ -38,18 +41,20 @@ import { TypeSelectorComponent } from './components/type-selector.component';
           ></app-specialization-picker>
         </div>
 
-        <div *ngIf="specialization()">
-          <p class="mb-3 text-xs uppercase text-forge-muted">Step 3 · DNA Preview</p>
+        <!-- Step 3 -->
+        <div *ngIf="specialization()" class="animate-fade-up">
+          <p class="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-400">Step 3 · DNA Preview</p>
           <app-dna-preview [specialization]="specialization()"></app-dna-preview>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3">
+        <!-- Actions -->
+        <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-100">
           <button class="btn-ghost" (click)="connectWallet()" *ngIf="!web3.isConnected()" [disabled]="isConnecting() || isMinting()">
-            {{ isConnecting() ? 'Connecting...' : 'CONNECT WALLET' }}
+            {{ isConnecting() ? 'Connecting...' : 'Connect Wallet' }}
           </button>
-          <button class="btn-forge" (click)="forge()" [disabled]="isMinting() || isConnecting()">FORGE THIS AGENT</button>
+          <button class="btn-forge" (click)="forge()" [disabled]="isMinting() || isConnecting()">Forge This Agent ✦</button>
           <app-loading-spinner *ngIf="isMinting()" label="Minting and finalizing on-chain DNA..."></app-loading-spinner>
-          <p class="text-xs text-forge-muted" *ngIf="!canMint()">Choose both agent type and specialization before forging.</p>
+          <p class="text-xs text-slate-400" *ngIf="!canMint()">Choose both agent type and specialization before forging.</p>
         </div>
       </div>
     </section>
@@ -86,10 +91,7 @@ export class ForgeComponent {
   }
 
   async connectWallet(): Promise<void> {
-    if (this.web3.isConnected()) {
-      return;
-    }
-
+    if (this.web3.isConnected()) return;
     this.isConnecting.set(true);
     try {
       await this.web3.connectWallet();
@@ -104,10 +106,7 @@ export class ForgeComponent {
 
   private async ensureWalletConnected(): Promise<string | null> {
     const wallet = this.web3.walletAddress();
-    if (wallet) {
-      return wallet;
-    }
-
+    if (wallet) return wallet;
     await this.connectWallet();
     return this.web3.walletAddress();
   }
@@ -118,11 +117,8 @@ export class ForgeComponent {
     const selectedSpecialization = this.specialization();
 
     if (!wallet || !selectedType || !selectedSpecialization) {
-      if (!wallet) {
-        this.notify.warning('Connect your wallet to continue');
-      } else {
-        this.notify.warning('Complete all steps before minting');
-      }
+      if (!wallet) this.notify.warning('Connect your wallet to continue');
+      else this.notify.warning('Complete all steps before minting');
       return;
     }
 

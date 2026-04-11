@@ -11,15 +11,16 @@ import { RentalListingFormComponent } from './components/rental-listing-form.com
   standalone: true,
   imports: [RentalBrowseComponent, RentalListingFormComponent, ActiveRentalsComponent],
   template: `
-    <section class="mx-auto max-w-7xl space-y-6">
-      <header>
-        <h1 class="font-display text-4xl text-white">Rental Market</h1>
-        <p class="text-forge-muted">List your agents for passive yield or lease top performers.</p>
+    <section class="mx-auto max-w-7xl space-y-7">
+      <header class="page-header">
+        <p class="section-kicker">Passive Income</p>
+        <h1>Rental Market</h1>
+        <p>List your agents for passive yield or lease top performers.</p>
       </header>
 
-      <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <app-rental-browse [items]="browse()" (rent)="rentAgent($event)"></app-rental-browse>
-        <div class="space-y-5">
+        <div class="space-y-6">
           <app-rental-listing-form (createListing)="createListing($event)"></app-rental-listing-form>
           <app-active-rentals [items]="listings()"></app-active-rentals>
         </div>

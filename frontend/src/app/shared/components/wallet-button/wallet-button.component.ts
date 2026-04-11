@@ -7,7 +7,7 @@ import { NotificationService } from '../../../core/services/notification.service
   standalone: true,
   template: `
     <button
-      class="rounded-xl border border-forge-border bg-forge-card/85 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-forge-secondary/60"
+      class="btn-dark rounded-full px-5 py-2"
       (click)="onClick()"
       [disabled]="loading()"
     >

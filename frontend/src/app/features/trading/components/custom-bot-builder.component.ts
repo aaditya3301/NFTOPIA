@@ -7,47 +7,62 @@ import { CustomBotConfig } from '../../../core/models/trade.model';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="glass-card space-y-4 p-5">
-      <h2 class="font-display text-2xl text-white">Custom Bot Builder</h2>
+    <div class="glass-card space-y-4 p-6">
+      <h2 class="font-display text-2xl font-bold text-nft-text">Custom Bot Builder</h2>
 
-      <label class="block text-sm text-forge-muted">Strategy Prompt</label>
-      <textarea
-        class="w-full rounded-lg border border-forge-border bg-[#081726] p-2 text-sm text-slate-100 placeholder:text-slate-500"
-        rows="3"
-        placeholder="Describe your trading strategy... e.g. 'Aggressive momentum trader that buys on breakouts and sells on RSI divergence'"
-        [(ngModel)]="strategyPrompt"
-      ></textarea>
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Strategy Prompt</label>
+        <textarea
+          class="input-light"
+          rows="3"
+          placeholder="Describe your trading strategy... e.g. 'Aggressive momentum trader that buys on breakouts and sells on RSI divergence'"
+          [(ngModel)]="strategyPrompt"
+        ></textarea>
+      </div>
 
-      <label class="block text-sm text-forge-muted">Market</label>
-      <select class="w-full rounded-lg border border-forge-border bg-[#081726] p-2" [(ngModel)]="form.market">
-        <option value="spot">Spot</option>
-        <option value="options">Options</option>
-        <option value="futures">Futures</option>
-      </select>
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Market</label>
+        <select class="input-light" [(ngModel)]="form.market">
+          <option value="spot">Spot</option>
+          <option value="options">Options</option>
+          <option value="futures">Futures</option>
+        </select>
+      </div>
 
-      <label class="block text-sm text-forge-muted">Assets (comma separated)</label>
-      <input class="w-full rounded-lg border border-forge-border bg-[#081726] p-2" [(ngModel)]="assetsInput" />
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Assets (comma separated)</label>
+        <input class="input-light" [(ngModel)]="assetsInput" />
+      </div>
 
-      <label class="block text-sm text-forge-muted">Goal</label>
-      <select class="w-full rounded-lg border border-forge-border bg-[#081726] p-2" [(ngModel)]="form.goal">
-        <option value="maximize_returns">Maximize Returns</option>
-        <option value="maximize_sharpe">Maximize Sharpe Ratio</option>
-        <option value="minimize_drawdown">Minimize Drawdown</option>
-      </select>
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Goal</label>
+        <select class="input-light" [(ngModel)]="form.goal">
+          <option value="maximize_returns">Maximize Returns</option>
+          <option value="maximize_sharpe">Maximize Sharpe Ratio</option>
+          <option value="minimize_drawdown">Minimize Drawdown</option>
+        </select>
+      </div>
 
-      <label class="block text-sm text-forge-muted">Risk Tolerance</label>
-      <select class="w-full rounded-lg border border-forge-border bg-[#081726] p-2" [(ngModel)]="form.riskTolerance">
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
-      </select>
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Risk Tolerance</label>
+        <select class="input-light" [(ngModel)]="form.riskTolerance">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
 
-      <label class="block text-sm text-forge-muted">Training Period</label>
-      <select class="w-full rounded-lg border border-forge-border bg-[#081726] p-2" [(ngModel)]="form.trainingPeriod">
-        <option value="5d">5 Days</option>
-        <option value="15d">15 Days</option>
-        <option value="1m">1 Month</option>
-      </select>
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Training Period</label>
+        <select class="input-light" [(ngModel)]="form.trainingPeriod">
+          <option value="5d">5 Days</option>
+          <option value="15d">15 Days</option>
+          <option value="1m">1 Month</option>
+          <option value="3m">3 Months</option>
+          <option value="6m">6 Months</option>
+          <option value="12m">1 Year</option>
+        </select>
+      </div>
 
       <button class="btn-forge w-full" (click)="submit()">MINT TRADING AGENT</button>
     </div>

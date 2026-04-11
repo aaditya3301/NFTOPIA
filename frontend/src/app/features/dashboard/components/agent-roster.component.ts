@@ -8,9 +8,9 @@ import { AgentCardComponent } from '../../../shared/components/agent-card/agent-
   standalone: true,
   imports: [NgFor, AgentCardComponent],
   template: `
-    <section class="space-y-3">
-      <h2 class="font-display text-2xl text-white">Agent Roster</h2>
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <section class="space-y-5">
+      <h2 class="font-display text-2xl font-bold text-nft-darker">Agent Roster</h2>
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <app-agent-card *ngFor="let agent of agents" [agent]="agent" [showActions]="true"></app-agent-card>
       </div>
     </section>

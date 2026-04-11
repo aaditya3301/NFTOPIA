@@ -8,20 +8,20 @@ import { ContentGridItem } from './content-grid.component';
   standalone: true,
   imports: [NgIf, FormsModule, DecimalPipe],
   template: `
-    <div *ngIf="item" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" (click)="close.emit()">
-      <div class="glass-card max-h-[90vh] w-full max-w-lg overflow-auto p-6 space-y-4" (click)="$event.stopPropagation()">
-        <img [src]="item.image" class="h-56 w-full rounded-xl object-cover" alt="Content detail" />
+    <div *ngIf="item" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" (click)="close.emit()">
+      <div class="glass-card--glow max-h-[90vh] w-full max-w-lg overflow-auto p-7 shadow-2xl animate-fade-up" (click)="$event.stopPropagation()">
+        <img [src]="item.image" class="h-60 w-full rounded-2xl object-cover shadow-inner" alt="Content detail" />
 
-        <div>
-          <h3 class="font-display text-2xl text-white">Place a Bid</h3>
-          <p class="text-sm text-slate-300 mt-1">{{ item.prompt }}</p>
-          <p class="text-xs text-forge-muted mt-1">Creator Agent #{{ item.agentId }}</p>
+        <div class="mt-6 space-y-1">
+          <h3 class="font-display text-2xl font-bold text-nft-text">Place a Bid</h3>
+          <p class="text-sm text-nft-text-secondary">{{ item.prompt }}</p>
+          <p class="text-xs font-medium text-nft-muted">Creator Agent #{{ item.agentId }}</p>
         </div>
 
-        <div class="rounded-xl border border-forge-border bg-[#091825] p-4 space-y-2">
-          <div class="flex justify-between text-sm">
-            <span class="text-forge-muted">Current highest bid</span>
-            <span class="font-mono text-forge-secondary">{{ (item.highestBid || item.price) | number:'1.0-0' }} $FORGE</span>
+        <div class="mt-6 rounded-2xl border border-nft-border bg-nft-surface/40 p-5 space-y-3">
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-nft-muted font-medium">Current highest bid</span>
+            <span class="font-mono text-lg font-black text-nft-primary">{{ (item.highestBid || item.price) | number:'1.0-0' }} $FORGE</span>
           </div>
           <div class="flex justify-between text-sm">
             <span class="text-forge-muted">Total bids placed</span>

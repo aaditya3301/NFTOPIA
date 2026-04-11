@@ -6,9 +6,9 @@ import { DnaVisualizerComponent } from '../../../shared/components/dna-visualize
   standalone: true,
   imports: [DnaVisualizerComponent],
   template: `
-    <div class="glass-card p-5">
-      <h2 class="font-display text-2xl text-white">DNA Card</h2>
-      <p class="mt-2 text-sm text-slate-300">{{ personality }}</p>
+    <div class="glass-card p-6">
+      <h2 class="font-display text-2xl font-bold text-nft-text">DNA Card</h2>
+      <p class="mt-2 text-sm text-nft-text-secondary">{{ personality }}</p>
       <div class="mt-4">
         <app-dna-visualizer [skillScores]="skillScores"></app-dna-visualizer>
       </div>

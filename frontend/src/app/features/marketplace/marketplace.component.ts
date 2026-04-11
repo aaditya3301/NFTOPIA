@@ -11,63 +11,89 @@ import { Web3Service } from '../../core/services/web3.service';
 import { ContentDetailModalComponent } from './components/content-detail-modal.component';
 import { ContentGridComponent, ContentGridItem } from './components/content-grid.component';
 import { FilterSidebarComponent } from './components/filter-sidebar.component';
+import { AgentGridComponent } from './components/agent-grid.component';
 
 @Component({
   selector: 'app-marketplace',
   standalone: true,
-  imports: [NgIf, NgFor, DecimalPipe, FormsModule, FilterSidebarComponent, ContentGridComponent, ContentDetailModalComponent],
+  imports: [NgIf, NgFor, DecimalPipe, FormsModule, FilterSidebarComponent, ContentGridComponent, AgentGridComponent, ContentDetailModalComponent],
   template: `
-    <section class="mx-auto max-w-7xl space-y-6">
-      <header>
-        <h1 class="font-display text-4xl text-white">Marketplace</h1>
-        <p class="text-forge-muted">Discover AI-generated content and place bids on NFTs.</p>
+    <section class="mx-auto max-w-7xl space-y-7">
+      <!-- Page Header -->
+      <header class="flex flex-wrap items-end justify-between gap-4">
+        <div class="page-header">
+          <p class="section-kicker">Explore</p>
+          <h1>Marketplace</h1>
+          <p>Discover content drops and high-performing agents.</p>
+        </div>
+        <div class="pill-tabs mb-2">
+          <button
+            class="pill-tab"
+            [class]="tab() === 'content' ? 'pill-tab--active' : 'pill-tab--inactive'"
+            (click)="tab.set('content')"
+          >Content</button>
+          <button
+            class="pill-tab"
+            [class]="tab() === 'agents' ? 'pill-tab--active' : 'pill-tab--inactive'"
+            (click)="tab.set('agents')"
+          >Agents</button>
+          <button
+            class="pill-tab"
+            [class]="tab() === 'leaderboard' ? 'pill-tab--active' : 'pill-tab--inactive'"
+            (click)="tab.set('leaderboard'); loadLeaderboard()"
+          >Leaderboard</button>
+        </div>
       </header>
 
-      <div class="rounded-xl border border-forge-border bg-forge-card/70 p-1 inline-flex">
-        <button class="px-3 py-2 text-sm" [class.text-white]="tab() === 'content'" (click)="tab.set('content')">Content</button>
-        <button class="px-3 py-2 text-sm" [class.text-white]="tab() === 'leaderboard'" (click)="tab.set('leaderboard'); loadLeaderboard()">Leaderboard</button>
-      </div>
-
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]" *ngIf="tab() === 'content'">
+      <!-- Content Tab -->
+      <div class="grid grid-cols-1 items-start gap-7 lg:grid-cols-[260px_1fr]" *ngIf="tab() === 'content'">
         <app-filter-sidebar (changeFilters)="applyFilters($event)"></app-filter-sidebar>
-        <app-content-grid [items]="filteredContent()" (bid)="openBidModal($event)"></app-content-grid>
+        <div class="animate-fade-up">
+          <app-content-grid [items]="filteredContent()" (bid)="openBidModal($event)"></app-content-grid>
+        </div>
       </div>
 
-      <div *ngIf="tab() === 'leaderboard'" class="glass-card overflow-hidden">
-        <div class="border-b border-forge-border p-4">
-          <h2 class="font-display text-2xl text-white">Content Leaderboard</h2>
-          <p class="text-sm text-forge-muted">All listed content ranked by current highest bid price.</p>
+      <!-- Agents Tab -->
+      <div *ngIf="tab() === 'agents'" class="animate-fade-up">
+        <app-agent-grid [agents]="filteredAgents()" (open)="openAgent($event)"></app-agent-grid>
+      </div>
+
+      <!-- Leaderboard Tab -->
+      <div *ngIf="tab() === 'leaderboard'" class="glass-card--glow overflow-hidden animate-fade-up">
+        <div class="border-b border-nft-border p-6">
+          <h2 class="font-display text-2xl font-bold text-nft-text">Content Leaderboard</h2>
+          <p class="text-sm text-nft-muted">All listed content ranked by current highest bid price.</p>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left">
-            <thead class="text-xs uppercase text-forge-muted bg-[#091825]">
+            <thead class="text-xs uppercase text-nft-muted bg-nft-surface/50">
               <tr>
-                <th class="px-4 py-3">Rank</th>
-                <th class="px-4 py-3">Preview</th>
-                <th class="px-4 py-3">Creator Agent</th>
-                <th class="px-4 py-3">Highest Bid</th>
-                <th class="px-4 py-3">Total Bids</th>
-                <th class="px-4 py-3">Base Price</th>
-                <th class="px-4 py-3">Action</th>
+                <th class="px-6 py-4">Rank</th>
+                <th class="px-6 py-4">Preview</th>
+                <th class="px-6 py-4">Creator Agent</th>
+                <th class="px-6 py-4">Highest Bid</th>
+                <th class="px-6 py-4">Total Bids</th>
+                <th class="px-6 py-4">Base Price</th>
+                <th class="px-6 py-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let item of leaderboardContent(); let i = index"
-                class="border-b border-forge-border/40 hover:bg-[#0c1f30] transition-colors">
-                <td class="px-4 py-3 font-mono text-forge-secondary">#{{ i + 1 }}</td>
-                <td class="px-4 py-3">
-                  <img [src]="item.image" class="h-10 w-16 rounded object-cover" alt="thumb" />
+                class="border-b border-nft-border/40 hover:bg-nft-primary/5 transition-colors">
+                <td class="px-6 py-4 font-mono font-bold text-nft-primary">#{{ i + 1 }}</td>
+                <td class="px-6 py-4">
+                  <img [src]="item.image" class="h-12 w-20 rounded-lg object-cover shadow-sm" alt="thumb" />
                 </td>
-                <td class="px-4 py-3 text-white">Agent #{{ item.agentId }}</td>
-                <td class="px-4 py-3 font-mono text-forge-secondary">{{ (item.highestBid || item.price) | number:'1.0-0' }} $FORGE</td>
-                <td class="px-4 py-3 text-slate-300">{{ item.bidCount || 0 }}</td>
-                <td class="px-4 py-3 font-mono text-slate-400">{{ item.price | number:'1.0-0' }} $FORGE</td>
-                <td class="px-4 py-3">
-                  <button class="btn-forge !px-3 !py-1.5 text-xs" (click)="openBidModal(item)">Bid</button>
+                <td class="px-6 py-4 font-semibold text-nft-text">Agent #{{ item.agentId }}</td>
+                <td class="px-6 py-4 font-mono font-bold text-nft-primary">{{ (item.highestBid || item.price) | number:'1.0-0' }} $FORGE</td>
+                <td class="px-6 py-4 text-nft-muted">{{ item.bidCount || 0 }}</td>
+                <td class="px-6 py-4 font-mono text-nft-muted/70">{{ item.price | number:'1.0-0' }} $FORGE</td>
+                <td class="px-6 py-4 text-right">
+                  <button class="btn-forge !px-4 !py-1.5 !text-xs !rounded-full" (click)="openBidModal(item)">Bid</button>
                 </td>
               </tr>
               <tr *ngIf="leaderboardContent().length === 0">
-                <td colspan="7" class="px-4 py-8 text-center text-forge-muted">No content available yet.</td>
+                <td colspan="7" class="px-6 py-12 text-center text-nft-muted font-medium">No content available yet.</td>
               </tr>
             </tbody>
           </table>
@@ -89,7 +115,7 @@ export class MarketplaceComponent implements OnInit {
   private readonly web3 = inject(Web3Service);
   private readonly router = inject(Router);
 
-  readonly tab = signal<'content' | 'leaderboard'>('content');
+  readonly tab = signal<'content' | 'agents' | 'leaderboard'>('content');
   readonly selectedContent = signal<ContentGridItem | null>(null);
 
   private readonly filters = signal({
@@ -99,9 +125,17 @@ export class MarketplaceComponent implements OnInit {
   });
 
   contentItems: (ContentGridItem & { contentType: 'image' | 'video' | 'text' })[] = [];
+  agents: AgentConfig[] = [];
 
   ngOnInit() {
     this.fetchContent();
+    this.fetchAgents();
+  }
+
+  private fetchAgents() {
+    this.agentService.getLeaderboard().subscribe(agents => {
+      this.agents = agents;
+    });
   }
 
   private fetchContent() {
@@ -154,14 +188,27 @@ export class MarketplaceComponent implements OnInit {
     return list;
   }
 
+  filteredAgents(): AgentConfig[] {
+    const f = this.filters();
+    return !f.agentType ? this.agents : this.agents.filter((a) => a.agentType === f.agentType);
+  }
+
+  openContentModal(item: ContentGridItem): void {
+    this.selectedContent.set(item);
+  }
+
   openBidModal(item: ContentGridItem): void {
     this.selectedContent.set(item);
+  }
+
+  openAgent(event: number | { tokenId: number }): void {
+    const tokenId = typeof event === 'number' ? event : event.tokenId;
+    this.router.navigate(['/agent', tokenId]);
   }
 
   async placeBid(item: ContentGridItem & { bidAmount?: number }): Promise<void> {
     const bidAmount = item.bidAmount || item.price;
 
-    // Ensure wallet connected
     let wallet = this.web3.walletAddress();
     if (!wallet) {
       try {
@@ -173,10 +220,7 @@ export class MarketplaceComponent implements OnInit {
       }
     }
 
-    if (!wallet) {
-      this.notify.error('Wallet not connected');
-      return;
-    }
+    if (!wallet) return;
 
     // Trigger MetaMask popup for bid confirmation
     const bidFeeEther = '0.005';
@@ -193,7 +237,7 @@ export class MarketplaceComponent implements OnInit {
       return;
     }
 
-    // Record on backend as a purchase (which drives price up)
+    // Record on backend
     if (item.contentId) {
       this.contentService.buyContent(item.contentId).subscribe({
         next: () => {
@@ -208,9 +252,5 @@ export class MarketplaceComponent implements OnInit {
       this.selectedContent.set(null);
       this.fetchContent();
     }
-  }
-
-  goAgent(tokenId: number): void {
-    this.router.navigate(['/agent', tokenId]);
   }
 }

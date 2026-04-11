@@ -8,10 +8,8 @@ type ContentType = 'image' | 'video' | 'text';
   standalone: true,
   imports: [NgFor, TitleCasePipe],
   template: `
-    <div class="grid grid-cols-1 gap-2 rounded-xl border border-forge-border bg-[#091927] p-1">
-      <button
-        class="rounded-lg px-3 py-2 text-sm bg-forge-primary text-black"
-      >
+    <div class="inline-flex rounded-full border border-nft-border bg-nft-surface p-1">
+      <button class="rounded-full bg-nft-primary px-5 py-2 text-sm font-medium text-white shadow-btn">
         Image
       </button>
     </div>
