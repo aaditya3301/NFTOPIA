@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.agentforge.xyz/api',
-  wsUrl: 'wss://api.agentforge.xyz/ws',
+  apiUrl: 'https://nftopia-production.up.railway.app/api',
+  wsUrl: 'wss://nftopia-production.up.railway.app/ws',
   helaRpcUrl: 'https://testnet-rpc.helachain.com',
   helaChainId: 666888,
   helaExplorerUrl: 'https://testnet-blockexplorer.helachain.com',

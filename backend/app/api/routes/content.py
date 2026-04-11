@@ -78,6 +78,16 @@ async def mint_content(
     content.price_forge = float(request.price_forge)
     content.tx_hash = content.tx_hash or f"simulated_tx_{content.content_id}"
     db.add(content)
+
+    if content.content_type == "image":
+        agent_result = await db.execute(select(AgentConfig).where(AgentConfig.token_id == content.agent_token_id))
+        agent = agent_result.scalar_one_or_none()
+        if agent:
+            # We must resolve the path similar to how the frontend does or just store relative
+            # Since frontend resolves relative, relative is perfect.
+            agent.metadata_uri = content.content_url
+            db.add(agent)
+
     await db.commit()
 
     return {

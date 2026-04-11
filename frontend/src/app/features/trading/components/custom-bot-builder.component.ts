@@ -11,6 +11,16 @@ import { CustomBotConfig } from '../../../core/models/trade.model';
       <h2 class="font-display text-2xl font-bold text-nft-text">Custom Bot Builder</h2>
 
       <div>
+        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Strategy Prompt</label>
+        <textarea
+          class="input-light"
+          rows="3"
+          placeholder="Describe your trading strategy... e.g. 'Aggressive momentum trader that buys on breakouts and sells on RSI divergence'"
+          [(ngModel)]="strategyPrompt"
+        ></textarea>
+      </div>
+
+      <div>
         <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Market</label>
         <select class="input-light" [(ngModel)]="form.market">
           <option value="spot">Spot</option>
@@ -56,8 +66,9 @@ import { CustomBotConfig } from '../../../core/models/trade.model';
   `
 })
 export class CustomBotBuilderComponent {
-  @Output() train = new EventEmitter<CustomBotConfig>();
+  @Output() train = new EventEmitter<CustomBotConfig & { strategyPrompt?: string }>();
 
+  strategyPrompt = '';
   assetsInput = 'BTC,ETH';
   form: CustomBotConfig = {
     market: 'spot',
@@ -73,7 +84,8 @@ export class CustomBotBuilderComponent {
       assets: this.assetsInput
         .split(',')
         .map((asset) => asset.trim().toUpperCase())
-        .filter(Boolean)
+        .filter(Boolean),
+      strategyPrompt: this.strategyPrompt
     });
   }
 }

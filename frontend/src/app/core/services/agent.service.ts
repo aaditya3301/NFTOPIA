@@ -45,6 +45,18 @@ interface BackendForgeResponse {
 export class AgentService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
+  private readonly backendBase = environment.apiUrl.replace(/\/api\/?$/, '');
+
+  private resolveMetadataUri(url: string): string {
+    if (!url) return url;
+    if (/^(https?:|data:|ipfs:)/i.test(url)) {
+      if (url === 'ipfs://placeholder') {
+        return 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=900&q=80';
+      }
+      return url;
+    }
+    return `${this.backendBase}${url.startsWith('/') ? '' : '/'}${url}`;
+  }
 
   private mapAgent(item: BackendAgent): AgentConfig {
     return {
@@ -60,7 +72,7 @@ export class AgentService {
       reputationScore: Number(item.reputationScore ?? item.reputation_score ?? 50),
       traits: item.traits ?? [],
       tbaWalletAddress: item.tbaWalletAddress ?? item.tba_wallet_address ?? '',
-      metadataURI: item.metadataURI ?? item.metadata_uri ?? '',
+      metadataURI: this.resolveMetadataUri(item.metadataURI ?? item.metadata_uri ?? ''),
       ownerAddress: item.ownerAddress ?? item.owner_address ?? ''
     };
   }
@@ -115,12 +127,7 @@ export class AgentService {
       'anime_art',
       'photorealistic_portraits',
       'abstract_art',
-      'cinematic_video',
-      'lofi_aesthetic',
-      'seo_blog_writer',
-      'social_media_content',
-      'technical_writer',
-      'creative_fiction'
+      'lofi_aesthetic'
     ];
   }
 

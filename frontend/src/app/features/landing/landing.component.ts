@@ -1,4 +1,4 @@
-import { DecimalPipe, NgFor } from '@angular/common';
+import { DecimalPipe, NgFor, NgIf } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { interval, startWith } from 'rxjs';
@@ -12,7 +12,7 @@ import { AgentConfig } from '../../core/models/agent.model';
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [NgFor, DecimalPipe, AgentCardComponent],
+  imports: [NgIf, NgFor, DecimalPipe, AgentCardComponent],
   template: `
     <!-- ═══ HERO SECTION ═══ -->
     <section class="relative mx-auto max-w-7xl overflow-visible pb-0">
@@ -181,56 +181,7 @@ export class LandingComponent {
 
   readonly stats = signal({ agentsMinted: 0, forgeEarned: 0, contentTraded: 0 });
 
-  readonly featuredAgents: AgentConfig[] = [
-    {
-      tokenId: 42,
-      agentType: 'content',
-      specialization: 'cyberpunk_image_gen',
-      personalityPrompt: '',
-      styleParameters: {},
-      skillScores: [88, 71, 64, 79, 58],
-      level: 7,
-      totalEarnings: 12543.5,
-      jobsCompleted: 84,
-      reputationScore: 92,
-      traits: ['viral_instinct', 'niche_authority'],
-      tbaWalletAddress: '',
-      metadataURI: 'https://images.unsplash.com/photo-1510511233900-1982d92bd835?auto=format&fit=crop&w=900&q=80',
-      ownerAddress: ''
-    },
-    {
-      tokenId: 133,
-      agentType: 'trading',
-      specialization: 'momentum_trader',
-      personalityPrompt: '',
-      styleParameters: {},
-      skillScores: [52, 85, 82, 78, 90],
-      level: 9,
-      totalEarnings: 23101.4,
-      jobsCompleted: 201,
-      reputationScore: 95,
-      traits: ['antifragile', 'steady_hand'],
-      tbaWalletAddress: '',
-      metadataURI: 'https://images.unsplash.com/photo-1551281044-8b7b7f4f38b5?auto=format&fit=crop&w=900&q=80',
-      ownerAddress: ''
-    },
-    {
-      tokenId: 217,
-      agentType: 'content',
-      specialization: 'anime_art',
-      personalityPrompt: '',
-      styleParameters: {},
-      skillScores: [78, 62, 74, 71, 66],
-      level: 5,
-      totalEarnings: 8921,
-      jobsCompleted: 62,
-      reputationScore: 87,
-      traits: ['style_loyalist'],
-      tbaWalletAddress: '',
-      metadataURI: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=80',
-      ownerAddress: ''
-    }
-  ];
+  readonly featuredAgents: AgentConfig[] = [];
 
   constructor() {
     interval(30000)
@@ -239,9 +190,7 @@ export class LandingComponent {
         this.market.getPlatformStats().subscribe({
           next: (res) => this.stats.set(res),
           error: () => {
-            if (this.stats().agentsMinted === 0) {
-              this.stats.set({ agentsMinted: 1248, forgeEarned: 892140, contentTraded: 3201 });
-            }
+             // Let it return zeroes if the backend fails instead of mock data
           }
         });
       });

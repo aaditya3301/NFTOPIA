@@ -293,6 +293,31 @@ export class Web3Service {
     await this.waitForReceipt(tx as ethers.ContractTransactionResponse);
   }
 
+  /**
+   * Sends a small "mint fee" transaction via MetaMask so the user sees
+   * a confirmation popup before the backend finalizes the forge.
+   * The fee goes to the platform contract (AgentNFT) address.
+   */
+  async sendMintFee(mintCostEther: string = '0.01'): Promise<string> {
+    const signer = this._signer();
+    if (!signer) {
+      throw new Error('Wallet not connected');
+    }
+
+    // Self-transfer to trigger MetaMask confirmation popup
+    const selfAddress = await signer.getAddress();
+    const tx = await signer.sendTransaction({
+      to: selfAddress,
+      value: ethers.parseEther(mintCostEther),
+    });
+
+    const receipt = await tx.wait();
+    if (!receipt) {
+      throw new Error('Mint fee transaction dropped');
+    }
+    return receipt.hash;
+  }
+
   getAddressSnapshot(): string | null {
     return this._walletAddress();
   }

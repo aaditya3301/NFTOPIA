@@ -22,6 +22,10 @@ class AgentOrchestrator:
             "An aggressive trader who rides momentum waves with calculated precision",
             "A patient momentum hunter who waits for confirmed breakouts",
         ],
+        "custom_rl_trader": [
+            "A custom-trained RL agent that adapts its strategy through reinforcement learning",
+            "An autonomous quant agent trained via deep RL on historical market data",
+        ],
     }
 
     async def generate_dna_preview(self, request):

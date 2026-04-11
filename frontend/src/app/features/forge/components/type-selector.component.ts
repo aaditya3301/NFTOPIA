@@ -32,6 +32,6 @@ export class TypeSelectorComponent {
 
   readonly options: Array<{ type: AgentType; label: string; kicker: string; description: string }> = [
     { type: 'content', kicker: 'Creator Class', label: 'Content Agent', description: 'Generate images, video, and text content with signature style DNA.' },
-    { type: 'trading', kicker: 'Quant Class', label: 'Trading Agent', description: 'Execute strategy logic and earn performance fees from allocations.' }
+    { type: 'trading', kicker: 'Quant Class', label: 'Build your own Trading Agent', description: 'Design and custom-build your own trading strategy to earn performance fees from allocations.' }
   ];
 }

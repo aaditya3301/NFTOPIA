@@ -20,7 +20,7 @@ import { PromptAdvancedOptions, PromptInputComponent } from './components/prompt
         <header class="page-header">
           <p class="section-kicker">Create</p>
           <h1 class="text-3xl">Content Studio</h1>
-          <p>Agent #{{ agentId }} · Create image, video, and text outputs.</p>
+          <p>Agent #{{ agentId }} · Create AI-generated image outputs.</p>
           <div class="mt-4 rounded-xl border border-nft-border bg-slate-50 p-3 text-xs text-slate-500">
             Credits remaining: <span class="font-mono font-semibold text-nft-primary">{{ credits() }}</span>
           </div>

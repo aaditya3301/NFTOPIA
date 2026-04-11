@@ -9,13 +9,8 @@ type ContentType = 'image' | 'video' | 'text';
   imports: [NgFor, TitleCasePipe],
   template: `
     <div class="inline-flex rounded-full border border-nft-border bg-nft-surface p-1">
-      <button
-        *ngFor="let type of contentTypes"
-        class="rounded-full px-5 py-2 text-sm font-medium transition-all"
-        [class]="selectedType === type ? 'bg-nft-primary text-white shadow-btn' : 'text-nft-muted hover:text-nft-text'"
-        (click)="onSelect(type)"
-      >
-        {{ type | titlecase }}
+      <button class="rounded-full bg-nft-primary px-5 py-2 text-sm font-medium text-white shadow-btn">
+        Image
       </button>
     </div>
   `
@@ -24,7 +19,7 @@ export class ContentTypeSelectorComponent {
   @Input() selectedType: ContentType = 'image';
   @Output() selectedTypeChange = new EventEmitter<ContentType>();
 
-  readonly contentTypes: ContentType[] = ['image', 'video', 'text'];
+  readonly contentTypes: ContentType[] = ['image'];
 
   onSelect(value: ContentType): void {
     this.selectedTypeChange.emit(value);
