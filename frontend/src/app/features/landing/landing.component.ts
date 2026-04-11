@@ -6,13 +6,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MarketplaceService } from '../../core/services/marketplace.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Web3Service } from '../../core/services/web3.service';
-import { AgentCardComponent } from '../../shared/components/agent-card/agent-card.component';
-import { AgentConfig } from '../../core/models/agent.model';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [NgIf, NgFor, DecimalPipe, AgentCardComponent],
+  imports: [NgIf, NgFor, DecimalPipe],
   template: `
     <!-- ═══ HERO SECTION ═══ -->
     <section class="relative mx-auto max-w-7xl overflow-visible pb-0">
@@ -43,10 +41,10 @@ import { AgentConfig } from '../../core/models/agent.model';
 
         <!-- LEFT: Text -->
         <div class="relative z-10 space-y-7 py-6 animate-fade-up">
-          <h1 class="font-display text-[3.2rem] font-black leading-[1.05] tracking-tight text-nft-darker sm:text-[4rem] lg:text-[4.8rem]">
-            Develop<br/>Your Own
+          <h1 class="font-display text-[3.2rem] font-black leading-[1.05] tracking-tight text-nft-darker sm:text-[4rem] lg:text-[4.4rem]">
+            Bring Your<br/>Digital Assets
             <span class="relative inline-block">
-              Collectible
+              to Life
               <!-- Chevron deco -->
               <svg class="absolute -right-10 -top-5 hidden sm:block" width="30" height="30" viewBox="0 0 30 30" fill="none">
                 <path d="M5 20L15 8L25 20" stroke="#6366F1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -55,7 +53,7 @@ import { AgentConfig } from '../../core/models/agent.model';
           </h1>
 
           <p class="max-w-md text-lg leading-relaxed text-slate-500">
-            Your Unique Collectible Journey From Concept to Creation. Mint AI agents, evolve their DNA, and earn inside a self-sustaining economy.
+            Go beyond static NFTs. Forge intelligent agents capable of content creation and market trading. Own a piece of an evolving, self-sustaining AI economy.
           </p>
 
           <div class="flex flex-wrap items-center gap-4">
@@ -127,23 +125,7 @@ import { AgentConfig } from '../../core/models/agent.model';
       </div>
     </section>
 
-    <!-- ═══ FEATURED AGENTS ═══ -->
-    <section class="mx-auto max-w-7xl py-8 space-y-7">
-      <div class="flex items-end justify-between">
-        <div>
-          <p class="section-kicker">Featured</p>
-          <h2 class="font-display text-3xl font-extrabold text-nft-darker">Top Agents</h2>
-        </div>
-        <a routerLink="/marketplace" class="btn-ghost !rounded-full text-xs">View All →</a>
-      </div>
-      <div class="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
-        <app-agent-card
-          *ngFor="let agent of featuredAgents"
-          [agent]="agent"
-          (onClick)="openAgent($event)"
-        ></app-agent-card>
-      </div>
-    </section>
+
   `,
   styles: [`
     :host { display: block; }
@@ -158,7 +140,7 @@ export class LandingComponent {
 
   readonly stats = signal({ agentsMinted: 0, forgeEarned: 0, contentTraded: 0 });
 
-  readonly featuredAgents: AgentConfig[] = [];
+
 
   constructor() {
     interval(30000)
