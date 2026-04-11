@@ -19,7 +19,7 @@ import { PromptAdvancedOptions, PromptInputComponent } from './components/prompt
       <div class="glass-card space-y-4 p-6">
         <header>
           <h1 class="font-display text-3xl text-white">Content Studio</h1>
-          <p class="text-sm text-forge-muted">Agent #{{ agentId }} · Create image, video, and text outputs.</p>
+          <p class="text-sm text-forge-muted">Agent #{{ agentId }} · Create AI-generated image outputs.</p>
           <div class="mt-3 rounded-xl border border-forge-border bg-[#0a1a28] p-3 text-xs text-forge-muted">
             Credits remaining: <span class="font-mono text-forge-secondary">{{ credits() }}</span>
           </div>

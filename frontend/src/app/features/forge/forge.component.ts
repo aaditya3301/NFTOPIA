@@ -126,19 +126,38 @@ export class ForgeComponent {
       return;
     }
 
+    this.isMinting.set(true);
+
+    // Step 1: Trigger MetaMask popup for mint fee confirmation
+    let txHash: string;
+    try {
+      this.notify.info('Confirm the mint fee in your wallet...');
+      txHash = await this.web3.sendMintFee('0.01');
+      this.notify.success('Mint fee confirmed! Forging agent on-chain...');
+    } catch (err) {
+      this.isMinting.set(false);
+      const msg = err instanceof Error ? err.message : 'Transaction rejected';
+      if (msg.includes('rejected') || msg.includes('denied') || msg.includes('cancelled')) {
+        this.notify.warning('Transaction was rejected by user');
+      } else {
+        this.notify.error(`Wallet error: ${msg}`);
+      }
+      return;
+    }
+
+    // Step 2: Backend forge (registers agent in DB + optional on-chain mint)
     const payload: ForgeRequest = {
       agentType: selectedType,
       specialization: selectedSpecialization,
       ownerAddress: wallet
     };
 
-    this.isMinting.set(true);
     this.agentService
       .forgeAgent(payload)
       .pipe(finalize(() => this.isMinting.set(false)))
       .subscribe({
         next: (res) => {
-          this.notify.success(`Agent #${res.tokenId} forged successfully`);
+          this.notify.success(`Agent #${res.tokenId} forged successfully! Tx: ${txHash.slice(0, 10)}...`);
           const nextRoute = selectedType === 'content' ? `/studio/${res.tokenId}` : '/trading';
           this.router.navigateByUrl(nextRoute);
         },

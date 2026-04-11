@@ -8,16 +8,11 @@ type ContentType = 'image' | 'video' | 'text';
   standalone: true,
   imports: [NgFor, TitleCasePipe],
   template: `
-    <div class="grid grid-cols-3 gap-2 rounded-xl border border-forge-border bg-[#091927] p-1">
+    <div class="grid grid-cols-1 gap-2 rounded-xl border border-forge-border bg-[#091927] p-1">
       <button
-        *ngFor="let type of contentTypes"
-        class="rounded-lg px-3 py-2 text-sm transition-all"
-        [class.bg-forge-primary]="selectedType === type"
-        [class.text-black]="selectedType === type"
-        [class.text-slate-300]="selectedType !== type"
-        (click)="onSelect(type)"
+        class="rounded-lg px-3 py-2 text-sm bg-forge-primary text-black"
       >
-        {{ type | titlecase }}
+        Image
       </button>
     </div>
   `
@@ -26,7 +21,7 @@ export class ContentTypeSelectorComponent {
   @Input() selectedType: ContentType = 'image';
   @Output() selectedTypeChange = new EventEmitter<ContentType>();
 
-  readonly contentTypes: ContentType[] = ['image', 'video', 'text'];
+  readonly contentTypes: ContentType[] = ['image'];
 
   onSelect(value: ContentType): void {
     this.selectedTypeChange.emit(value);
