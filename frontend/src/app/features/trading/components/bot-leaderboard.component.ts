@@ -7,32 +7,32 @@ import { TradingAgent } from '../../../core/models/trade.model';
   standalone: true,
   imports: [NgFor, DecimalPipe],
   template: `
-    <div class="glass-card overflow-hidden">
+    <div class="glass-card--glow overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead class="bg-[#0b1f2e] text-xs uppercase text-forge-muted">
+        <table class="data-table">
+          <thead>
             <tr>
-              <th class="px-4 py-3 text-left">Rank</th>
-              <th class="px-4 py-3 text-left">Agent</th>
-              <th class="px-4 py-3 text-left">Strategy</th>
-              <th class="px-4 py-3 text-left">Total P&L</th>
-              <th class="px-4 py-3 text-left">Trades</th>
-              <th class="px-4 py-3 text-left">Win Rate</th>
-              <th class="px-4 py-3 text-left">Sharpe</th>
-              <th class="px-4 py-3 text-left">Action</th>
+              <th>Rank</th>
+              <th>Agent</th>
+              <th>Strategy</th>
+              <th>Total P&L</th>
+              <th>Trades</th>
+              <th>Win Rate</th>
+              <th>Sharpe</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let bot of bots" class="cursor-pointer border-t border-forge-border/70 hover:bg-[#0d2030]" (click)="open.emit(bot)">
-              <td class="px-4 py-3">#{{ bot.rank }}</td>
-              <td class="px-4 py-3">Agent #{{ bot.tokenId }}</td>
-              <td class="px-4 py-3">{{ bot.strategyType }}</td>
-              <td class="px-4 py-3" [class.text-forge-success]="bot.totalPnl >= 0" [class.text-forge-danger]="bot.totalPnl < 0">{{ bot.totalPnl | number: '1.1-2' }}</td>
-              <td class="px-4 py-3">{{ bot.totalTrades }}</td>
-              <td class="px-4 py-3">{{ bot.winRate | number: '1.0-0' }}%</td>
-              <td class="px-4 py-3">{{ (bot.sharpeRatio ?? 0) | number: '1.1-2' }}</td>
-              <td class="px-4 py-3">
-                <button class="btn-ghost" (click)="allocate.emit(bot); $event.stopPropagation()">Allocate</button>
+            <tr *ngFor="let bot of bots" class="cursor-pointer group" (click)="open.emit(bot)">
+              <td class="font-mono text-xs text-slate-400">#{{ bot.rank }}</td>
+              <td class="font-semibold text-nft-darker">Agent #{{ bot.tokenId }}</td>
+              <td class="text-slate-500">{{ bot.strategyType }}</td>
+              <td class="font-mono font-bold" [class.text-emerald-500]="bot.totalPnl >= 0" [class.text-red-400]="bot.totalPnl < 0">{{ bot.totalPnl | number: '1.1-2' }}</td>
+              <td class="text-slate-500">{{ bot.totalTrades }}</td>
+              <td class="text-slate-500">{{ bot.winRate | number: '1.0-0' }}%</td>
+              <td class="font-mono text-slate-500">{{ (bot.sharpeRatio ?? 0) | number: '1.1-2' }}</td>
+              <td>
+                <button class="btn-forge !px-4 !py-1.5 !text-xs !rounded-full" (click)="allocate.emit(bot); $event.stopPropagation()">Allocate</button>
               </td>
             </tr>
           </tbody>

@@ -13,13 +13,13 @@ export interface RentalBrowseItem {
   standalone: true,
   imports: [NgFor],
   template: `
-    <div class="glass-card p-5">
-      <h2 class="font-display text-2xl text-white">Browse Rentals</h2>
-      <div class="mt-3 space-y-3">
-        <article *ngFor="let item of items" class="rounded-xl border border-forge-border bg-[#0a1a28] p-3">
-          <p class="text-sm text-slate-200">Agent #{{ item.tokenId }} · {{ item.specialization }}</p>
-          <p class="text-xs text-forge-muted">{{ item.rate }} $FORGE/day · max {{ item.maxDays }} days</p>
-          <button class="btn-ghost mt-2" (click)="rent.emit(item)">Rent</button>
+    <div class="glass-card p-6">
+      <h2 class="font-display text-2xl font-bold text-nft-text">Browse Rentals</h2>
+      <div class="mt-4 space-y-3">
+        <article *ngFor="let item of items" class="rounded-xl border border-nft-border bg-nft-surface p-4 hover:shadow-card transition-all">
+          <p class="text-sm font-semibold text-nft-text">Agent #{{ item.tokenId }} · {{ item.specialization }}</p>
+          <p class="text-xs text-nft-muted mt-1">{{ item.rate }} $FORGE/day · max {{ item.maxDays }} days</p>
+          <button class="btn-forge !px-4 !py-1.5 !text-xs !rounded-full mt-3" (click)="rent.emit(item)">Rent</button>
         </article>
       </div>
     </div>

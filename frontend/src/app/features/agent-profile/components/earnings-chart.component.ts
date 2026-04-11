@@ -7,15 +7,15 @@ import { ChartConfiguration } from 'chart.js';
   standalone: true,
   imports: [BaseChartDirective],
   template: `
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <div class="glass-card p-4">
-        <h4 class="font-display text-lg text-white">Earnings Over Time</h4>
-        <div class="mt-2 h-56"><canvas baseChart [type]="'line'" [data]="lineData" [options]="lineOptions"></canvas></div>
+    <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div class="glass-card p-5">
+        <h4 class="font-display text-lg font-bold text-nft-text">Earnings Over Time</h4>
+        <div class="mt-3 h-56"><canvas baseChart [type]="'line'" [data]="lineData" [options]="lineOptions"></canvas></div>
       </div>
 
-      <div class="glass-card p-4">
-        <h4 class="font-display text-lg text-white">Content Popularity</h4>
-        <div class="mt-2 h-56"><canvas baseChart [type]="'bar'" [data]="barData" [options]="barOptions"></canvas></div>
+      <div class="glass-card p-5">
+        <h4 class="font-display text-lg font-bold text-nft-text">Content Popularity</h4>
+        <div class="mt-3 h-56"><canvas baseChart [type]="'bar'" [data]="barData" [options]="barOptions"></canvas></div>
       </div>
     </div>
   `
@@ -33,8 +33,8 @@ export class EarningsChartComponent {
         {
           label: 'Earnings',
           data: this.lineValues,
-          borderColor: '#0EA5A1',
-          backgroundColor: 'rgba(14,165,161,.18)',
+          borderColor: '#6366F1',
+          backgroundColor: 'rgba(99,102,241,.1)',
           fill: true,
           tension: 0.35,
           pointRadius: 2
@@ -46,10 +46,10 @@ export class EarningsChartComponent {
   readonly lineOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { labels: { color: '#b5c7d8' } } },
+    plugins: { legend: { labels: { color: '#6B7280' } } },
     scales: {
-      x: { ticks: { color: '#89a0b5' }, grid: { color: 'rgba(137,160,181,.15)' } },
-      y: { ticks: { color: '#89a0b5' }, grid: { color: 'rgba(137,160,181,.15)' } }
+      x: { ticks: { color: '#9CA3AF' }, grid: { color: 'rgba(229,231,235,.5)' } },
+      y: { ticks: { color: '#9CA3AF' }, grid: { color: 'rgba(229,231,235,.5)' } }
     }
   };
 
@@ -60,7 +60,7 @@ export class EarningsChartComponent {
         {
           label: 'Count',
           data: this.popularityValues,
-          backgroundColor: ['#22D3EE', '#0EA5A1', '#F97316']
+          backgroundColor: ['#6366F1', '#14B8A6', '#F59E0B']
         }
       ]
     };
@@ -69,10 +69,10 @@ export class EarningsChartComponent {
   readonly barOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { labels: { color: '#b5c7d8' } } },
+    plugins: { legend: { labels: { color: '#6B7280' } } },
     scales: {
-      x: { ticks: { color: '#89a0b5' }, grid: { color: 'rgba(137,160,181,.15)' } },
-      y: { ticks: { color: '#89a0b5' }, grid: { color: 'rgba(137,160,181,.15)' } }
+      x: { ticks: { color: '#9CA3AF' }, grid: { color: 'rgba(229,231,235,.5)' } },
+      y: { ticks: { color: '#9CA3AF' }, grid: { color: 'rgba(229,231,235,.5)' } }
     }
   };
 }

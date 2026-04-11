@@ -9,11 +9,11 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
     <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
       <button
         *ngFor="let item of options"
-        class="rounded-xl border p-3 text-left text-sm transition-all"
+        class="rounded-xl border p-3.5 text-left text-sm font-medium transition-all"
         [ngClass]="
           selected === item
-            ? 'border-forge-secondary bg-forge-secondary/10 text-forge-secondary'
-            : 'border-forge-border bg-forge-card/70 text-slate-200 hover:border-forge-primary/60'
+            ? 'border-nft-primary bg-nft-primary/8 text-nft-primary ring-1 ring-nft-primary/20'
+            : 'border-nft-border bg-white text-nft-text-secondary hover:border-nft-primary/40 hover:text-nft-primary'
         "
         (click)="select.emit(item)"
       >

@@ -6,17 +6,23 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="glass-card p-5">
-      <h2 class="font-display text-2xl text-white">List Agent For Rent</h2>
-      <div class="mt-3 grid grid-cols-1 gap-3">
-        <label class="text-xs uppercase text-forge-muted">Token ID</label>
-        <input type="number" min="1" class="rounded-lg border border-forge-border bg-[#081726] p-2" [(ngModel)]="tokenId" />
+    <div class="glass-card p-6">
+      <h2 class="font-display text-2xl font-bold text-nft-text">List Agent For Rent</h2>
+      <div class="mt-4 grid grid-cols-1 gap-4">
+        <div>
+          <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Token ID</label>
+          <input type="number" min="1" class="input-light" [(ngModel)]="tokenId" />
+        </div>
 
-        <label class="text-xs uppercase text-forge-muted">Price per day ($FORGE)</label>
-        <input type="number" min="1" class="rounded-lg border border-forge-border bg-[#081726] p-2" [(ngModel)]="pricePerDay" />
+        <div>
+          <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Price per day ($FORGE)</label>
+          <input type="number" min="1" class="input-light" [(ngModel)]="pricePerDay" />
+        </div>
 
-        <label class="text-xs uppercase text-forge-muted">Max duration (days)</label>
-        <input type="number" min="1" max="30" class="rounded-lg border border-forge-border bg-[#081726] p-2" [(ngModel)]="maxDuration" />
+        <div>
+          <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-nft-muted">Max duration (days)</label>
+          <input type="number" min="1" max="30" class="input-light" [(ngModel)]="maxDuration" />
+        </div>
 
         <button class="btn-forge" (click)="submit()">Create Listing</button>
       </div>

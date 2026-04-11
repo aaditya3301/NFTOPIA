@@ -8,13 +8,11 @@ type ContentType = 'image' | 'video' | 'text';
   standalone: true,
   imports: [NgFor, TitleCasePipe],
   template: `
-    <div class="grid grid-cols-3 gap-2 rounded-xl border border-forge-border bg-[#091927] p-1">
+    <div class="inline-flex rounded-full border border-nft-border bg-nft-surface p-1">
       <button
         *ngFor="let type of contentTypes"
-        class="rounded-lg px-3 py-2 text-sm transition-all"
-        [class.bg-forge-primary]="selectedType === type"
-        [class.text-black]="selectedType === type"
-        [class.text-slate-300]="selectedType !== type"
+        class="rounded-full px-5 py-2 text-sm font-medium transition-all"
+        [class]="selectedType === type ? 'bg-nft-primary text-white shadow-btn' : 'text-nft-muted hover:text-nft-text'"
         (click)="onSelect(type)"
       >
         {{ type | titlecase }}

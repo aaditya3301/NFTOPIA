@@ -7,8 +7,8 @@ import { ChartConfiguration } from 'chart.js';
   standalone: true,
   imports: [BaseChartDirective],
   template: `
-    <div class="glass-card p-5">
-      <h3 class="mb-3 font-display text-xl text-white">P&L Performance</h3>
+    <div class="glass-card p-6">
+      <h3 class="mb-3 font-display text-xl font-bold text-nft-text">P&L Performance</h3>
       <canvas baseChart [type]="'line'" [data]="lineData" [options]="lineOptions"></canvas>
     </div>
   `
@@ -26,7 +26,7 @@ export class PnlChartComponent {
           data: this.pnlValues,
           label: 'Agent P&L',
           borderColor: '#10B981',
-          backgroundColor: 'rgba(16,185,129,.15)',
+          backgroundColor: 'rgba(16,185,129,.1)',
           fill: true,
           tension: 0.35,
           pointRadius: 2
@@ -34,7 +34,7 @@ export class PnlChartComponent {
         {
           data: this.benchmarkValues,
           label: 'Benchmark',
-          borderColor: '#22D3EE',
+          borderColor: '#6366F1',
           borderDash: [6, 4],
           fill: false,
           tension: 0.35,
@@ -49,17 +49,17 @@ export class PnlChartComponent {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        labels: { color: '#b5c7d8' }
+        labels: { color: '#6B7280' }
       }
     },
     scales: {
       x: {
-        ticks: { color: '#89a0b5' },
-        grid: { color: 'rgba(137,160,181,.15)' }
+        ticks: { color: '#9CA3AF' },
+        grid: { color: 'rgba(229,231,235,.5)' }
       },
       y: {
-        ticks: { color: '#89a0b5' },
-        grid: { color: 'rgba(137,160,181,.15)' }
+        ticks: { color: '#9CA3AF' },
+        grid: { color: 'rgba(229,231,235,.5)' }
       }
     }
   };

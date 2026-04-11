@@ -4,7 +4,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-level-badge',
   standalone: true,
   template: `
-    <span class="rounded-full border border-forge-secondary/50 bg-black/60 px-2 py-1 font-mono text-xs text-forge-secondary">
+    <span class="rounded-full bg-nft-primary/15 px-2.5 py-1 font-mono text-xs font-bold text-nft-primary">
       LVL {{ level }}
     </span>
   `

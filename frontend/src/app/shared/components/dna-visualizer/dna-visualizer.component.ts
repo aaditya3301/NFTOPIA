@@ -7,14 +7,14 @@ import { NgFor } from '@angular/common';
   imports: [NgFor],
   template: `
     <div class="space-y-3">
-      <div *ngFor="let row of rows" class="space-y-1">
-        <div class="flex items-center justify-between text-xs text-forge-muted">
-          <span>{{ row.label }}</span>
-          <span>{{ row.value }}</span>
+      <div *ngFor="let row of rows" class="space-y-1.5">
+        <div class="flex items-center justify-between text-xs font-medium">
+          <span class="text-nft-text-secondary">{{ row.label }}</span>
+          <span class="text-nft-text font-mono">{{ row.value }}</span>
         </div>
-        <div class="h-2 rounded-full bg-[#0a1620]">
+        <div class="h-2 rounded-full bg-nft-surface-alt">
           <div
-            class="h-2 rounded-full bg-gradient-to-r from-forge-primary to-forge-secondary transition-all"
+            class="h-2 rounded-full bg-gradient-to-r from-nft-primary to-nft-secondary transition-all"
             [style.width.%]="row.value"
           ></div>
         </div>

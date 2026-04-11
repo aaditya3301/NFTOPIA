@@ -8,15 +8,15 @@ import { ChartConfiguration } from 'chart.js';
   standalone: true,
   imports: [BaseChartDirective, DecimalPipe],
   template: `
-    <div class="glass-card p-5">
-      <h3 class="font-display text-2xl text-white">Training Progress</h3>
+    <div class="glass-card p-6">
+      <h3 class="font-display text-2xl font-bold text-nft-text">Training Progress</h3>
 
-      <div class="mt-3 space-y-2">
-        <p class="text-sm text-slate-300">Epoch: {{ epoch }}/{{ totalEpochs }}</p>
-        <div class="h-3 rounded-full bg-[#091825]">
-          <div class="h-3 rounded-full bg-gradient-to-r from-forge-primary to-forge-secondary" [style.width.%]="progress"></div>
+      <div class="mt-4 space-y-2">
+        <p class="text-sm text-nft-text-secondary">Epoch: {{ epoch }}/{{ totalEpochs }}</p>
+        <div class="h-3 rounded-full bg-nft-surface-alt">
+          <div class="h-3 rounded-full bg-gradient-to-r from-nft-primary to-nft-secondary transition-all" [style.width.%]="progress"></div>
         </div>
-        <p class="text-xs text-forge-muted">Sharpe: {{ sharpe | number: '1.2-2' }} · Max drawdown: {{ maxDrawdown | number: '1.2-2' }}%</p>
+        <p class="text-xs text-nft-muted">Sharpe: {{ sharpe | number: '1.2-2' }} · Max drawdown: {{ maxDrawdown | number: '1.2-2' }}%</p>
       </div>
 
       <div class="mt-4 h-52">
@@ -47,8 +47,8 @@ export class TrainingVisualizerComponent {
         {
           data: this.rewards,
           label: 'Reward Curve',
-          borderColor: '#F97316',
-          backgroundColor: 'rgba(249,115,22,.15)',
+          borderColor: '#6366F1',
+          backgroundColor: 'rgba(99,102,241,.1)',
           fill: true,
           tension: 0.35,
           pointRadius: 1.8
@@ -61,16 +61,16 @@ export class TrainingVisualizerComponent {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: '#b5c7d8' } }
+      legend: { labels: { color: '#6B7280' } }
     },
     scales: {
       x: {
-        ticks: { color: '#89a0b5' },
-        grid: { color: 'rgba(137,160,181,.15)' }
+        ticks: { color: '#9CA3AF' },
+        grid: { color: 'rgba(229,231,235,.5)' }
       },
       y: {
-        ticks: { color: '#89a0b5' },
-        grid: { color: 'rgba(137,160,181,.15)' }
+        ticks: { color: '#9CA3AF' },
+        grid: { color: 'rgba(229,231,235,.5)' }
       }
     }
   };

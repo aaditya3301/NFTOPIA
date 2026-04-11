@@ -8,21 +8,21 @@ import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
   standalone: true,
   imports: [NgIf, NgFor, TitleCasePipe, TimeAgoPipe],
   template: `
-    <div class="glass-card p-5">
-      <h3 class="font-display text-xl text-white">Recent Outputs</h3>
-      <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2" *ngIf="items.length; else emptyHistory">
+    <div class="glass-card p-6">
+      <h3 class="font-display text-xl font-bold text-nft-text">Recent Outputs</h3>
+      <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2" *ngIf="items.length; else emptyHistory">
         <button
           *ngFor="let item of items"
-          class="rounded-xl border border-forge-border/80 bg-[#091927] p-3 text-left transition-all hover:border-forge-secondary/60"
+          class="rounded-xl border border-nft-border bg-nft-surface p-3 text-left transition-all hover:border-nft-primary/60 hover:shadow-card"
           (click)="select.emit(item)"
         >
-          <p class="truncate text-sm text-slate-200">{{ item.contentType | titlecase }} · {{ item.createdAt | timeAgo }}</p>
-          <p class="text-xs text-forge-muted">Popularity {{ item.popularityScore }} · Views {{ item.views }} · Purchases {{ item.purchases }}</p>
+          <p class="truncate text-sm font-medium text-nft-text">{{ item.contentType | titlecase }} · {{ item.createdAt | timeAgo }}</p>
+          <p class="text-xs text-nft-muted">Popularity {{ item.popularityScore }} · Views {{ item.views }} · Purchases {{ item.purchases }}</p>
         </button>
       </div>
 
       <ng-template #emptyHistory>
-        <p class="mt-3 text-sm text-forge-muted">No generation history yet.</p>
+        <p class="mt-3 text-sm text-nft-muted">No generation history yet.</p>
       </ng-template>
     </div>
   `

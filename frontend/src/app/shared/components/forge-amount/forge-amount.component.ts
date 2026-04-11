@@ -5,7 +5,7 @@ import { ForgeFormatPipe } from '../../pipes/forge-format.pipe';
   selector: 'app-forge-amount',
   standalone: true,
   imports: [ForgeFormatPipe],
-  template: `<span class="font-mono text-forge-secondary">{{ amount | forgeFormat }}</span>`
+  template: `<span class="font-mono font-semibold text-nft-primary">{{ amount | forgeFormat }}</span>`
 })
 export class ForgeAmountComponent {
   @Input() amount = 0;

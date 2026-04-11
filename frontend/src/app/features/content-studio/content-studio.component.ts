@@ -15,13 +15,14 @@ import { PromptAdvancedOptions, PromptInputComponent } from './components/prompt
   standalone: true,
   imports: [NgIf, PromptInputComponent, ContentTypeSelectorComponent, GenerationPreviewComponent, ContentHistoryComponent],
   template: `
-    <section class="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1fr]">
-      <div class="glass-card space-y-4 p-6">
-        <header>
-          <h1 class="font-display text-3xl text-white">Content Studio</h1>
-          <p class="text-sm text-forge-muted">Agent #{{ agentId }} · Create image, video, and text outputs.</p>
-          <div class="mt-3 rounded-xl border border-forge-border bg-[#0a1a28] p-3 text-xs text-forge-muted">
-            Credits remaining: <span class="font-mono text-forge-secondary">{{ credits() }}</span>
+    <section class="mx-auto grid max-w-7xl grid-cols-1 gap-7 lg:grid-cols-[1.1fr_1fr]">
+      <div class="glass-card--glow space-y-6 p-7">
+        <header class="page-header">
+          <p class="section-kicker">Create</p>
+          <h1 class="text-3xl">Content Studio</h1>
+          <p>Agent #{{ agentId }} · Create image, video, and text outputs.</p>
+          <div class="mt-4 rounded-xl border border-nft-border bg-slate-50 p-3 text-xs text-slate-500">
+            Credits remaining: <span class="font-mono font-semibold text-nft-primary">{{ credits() }}</span>
           </div>
         </header>
 
@@ -29,8 +30,8 @@ import { PromptAdvancedOptions, PromptInputComponent } from './components/prompt
 
         <app-prompt-input [(prompt)]="prompt" [(options)]="advancedOptions"></app-prompt-input>
 
-        <div class="flex items-center justify-between">
-          <p class="text-xs text-forge-muted">Estimated time: {{ etaLabel() }}</p>
+        <div class="flex items-center justify-between pt-2 border-t border-nft-border">
+          <p class="text-xs text-nft-muted">Estimated time: {{ etaLabel() }}</p>
           <button class="btn-forge" (click)="generate()" [disabled]="isGenerating() || !prompt.trim()">Generate</button>
         </div>
       </div>
@@ -50,7 +51,7 @@ import { PromptAdvancedOptions, PromptInputComponent } from './components/prompt
           (viewMarketplace)="goMarketplace()"
           (viewAgent)="goAgent()"
         ></app-generation-preview>
-        <p class="px-1 text-xs text-forge-muted" *ngIf="generationDebug()">Debug: {{ generationDebug() }}</p>
+        <p class="px-1 text-xs text-nft-muted" *ngIf="generationDebug()">Debug: {{ generationDebug() }}</p>
 
         <app-content-history [items]="history()" (select)="selectHistoryItem($event)"></app-content-history>
       </div>

@@ -13,17 +13,20 @@ export interface ContentGridItem {
   standalone: true,
   imports: [NgFor],
   template: `
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <article *ngFor="let item of items" class="glass-card overflow-hidden">
-        <img [src]="item.image" class="h-52 w-full object-cover" alt="Content preview" />
-        <div class="space-y-2 p-4">
-          <p class="line-clamp-2 text-sm text-slate-200">{{ item.prompt }}</p>
-          <p class="text-xs text-forge-muted">Creator Agent #{{ item.agentId }}</p>
-          <div class="flex items-center justify-between">
-            <span class="font-mono text-forge-secondary">{{ item.price }} $FORGE</span>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <article *ngFor="let item of items; let i = index" class="glass-card--glow overflow-hidden group transition-all duration-500 hover:-translate-y-2" [style.animation-delay.ms]="i * 80">
+        <div class="overflow-hidden">
+          <img [src]="item.image" class="h-56 w-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Content preview" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        </div>
+        <div class="space-y-3 p-5">
+          <p class="line-clamp-2 text-sm font-semibold text-nft-darker leading-snug">{{ item.prompt }}</p>
+          <p class="text-xs text-slate-400">Creator Agent #{{ item.agentId }}</p>
+          <div class="flex items-center justify-between pt-1">
+            <span class="font-mono text-sm font-black gradient-text">{{ item.price }} $FORGE</span>
             <div class="flex gap-2">
-              <button class="btn-ghost" (click)="view.emit(item)">View</button>
-              <button class="btn-forge !px-3 !py-2 text-xs" (click)="buy.emit(item)">Buy</button>
+              <button class="btn-ghost !px-3.5 !py-1.5 !text-xs !rounded-full" (click)="view.emit(item)">View</button>
+              <button class="btn-forge !px-3.5 !py-1.5 !text-xs !rounded-full" (click)="buy.emit(item)">Buy</button>
             </div>
           </div>
         </div>
